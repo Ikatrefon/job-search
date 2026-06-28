@@ -10,6 +10,11 @@
                src: url("fonts/ArialNarrow-Bold.ttf") format("truetype"); }
   @font-face { font-family: "Antonio"; font-weight: 100 700; font-style: normal;
                src: url("fonts/Antonio.ttf") format("truetype"); }
+  /* alias pod nazwę używaną w SVG-ach z Figmy */
+  @font-face { font-family: "Arial Narrow"; font-weight: 400; font-style: normal;
+               src: url("fonts/ArialNarrow.ttf") format("truetype"); }
+  @font-face { font-family: "Arial Narrow"; font-weight: 700; font-style: normal;
+               src: url("fonts/ArialNarrow-Bold.ttf") format("truetype"); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --ink: #161616;
@@ -56,7 +61,13 @@
   .add-item { margin-bottom: 4pt; }
   .add-item b { font-weight: bold; }
 
-  /* ---------- PAGE 2/3 EXPERIENCE ---------- */
+  /* ---------- PAGE 2 — prace z SVG (głowa) + punkty 12pt ---------- */
+  .job2 { margin-bottom: 11pt; }
+  .job2-head { width: 527pt; margin-bottom: 5pt; }   /* SVG skalowany do kolumny: logo lewo, daty prawo wyrównane */
+  .job2-head svg { width: 100%; height: auto; display: block; }
+  .job2 ul.bul { font-family: var(--narrow); font-size: 12pt; line-height: 1.18; }
+
+  /* ---------- PAGE 2/3 EXPERIENCE (stary układ — str. 3) ---------- */
   .h-big { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
            font-size: 13px; letter-spacing: .05em; margin-bottom: 9px; color: var(--grey); }
   .tagline { font-family: var(--narrow); font-weight: bold; color: var(--grey-light);
@@ -142,13 +153,15 @@
   <div class="pageno">( <b>2</b> of 3 )</div>
   <div class="h-big">Employment history</div>
   {% for j in cv.experience[:5] %}
-  <div class="job">
-    {% if j.aside %}<div class="aside"><img src="{{ j.aside.logo }}">{{ j.aside.text }}</div>{% endif %}
+  <div class="job2">
+    {% if j.head_svg %}<div class="job2-head">{{ j.head_svg|safe }}</div>
+    {% else %}
     <div class="job-head">
       {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
       <span class="job-role">{{ j.role }}</span>
       <span class="job-dates">{{ j.dates }}</span>
     </div>
+    {% endif %}
     <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
   </div>
   {% endfor %}
