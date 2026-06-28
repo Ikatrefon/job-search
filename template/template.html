@@ -4,13 +4,17 @@
 <meta charset="UTF-8">
 <style>
   @page { size: A4; margin: 0; }
+  @font-face { font-family: "ArialN"; font-weight: 400; font-style: normal;
+               src: url("fonts/ArialNarrow.ttf") format("truetype"); }
+  @font-face { font-family: "ArialN"; font-weight: 700; font-style: normal;
+               src: url("fonts/ArialNarrow-Bold.ttf") format("truetype"); }
   * { margin: 0; padding: 0; box-sizing: border-box; }
   :root {
     --ink: #161616;
     --grey: #8c8c8c;
     --grey-light: #b9b9b9;
     --line: #d8d8d8;
-    --narrow: "Arial Narrow", "Liberation Sans Narrow", Arial, sans-serif;
+    --narrow: "ArialN", "Arial Narrow", Arial, sans-serif;
     --body: Arial, "Liberation Sans", Helvetica, sans-serif;
   }
   html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
@@ -29,20 +33,21 @@
             font-size: 19px; color: var(--grey-light); letter-spacing: .02em; }
   .pageno b { color: var(--grey); }
 
-  /* ---------- PAGE 1 HEADER ---------- */
-  .head { display: flex; justify-content: space-between; align-items: flex-start; min-height: 150px; }
-  .name { font-family: var(--narrow); font-weight: bold; font-size: 73px; line-height: .9;
-          text-transform: uppercase; letter-spacing: 0; }
-  .head-right { position: relative; width: 250px; height: 150px; }
-  .photo { position: absolute; right: 0; top: 6px; width: 130px; height: auto;
-           filter: grayscale(1) contrast(1.02); }
-  .badge { position: absolute; left: 0; top: 30px; font-family: var(--narrow); color: var(--grey); }
-  .badge .big { font-weight: bold; font-size: 46px; line-height: .8; }
-  .badge .yrs { font-weight: bold; font-size: 19px; line-height: 1; margin-top: 2px; white-space: pre-line; }
-  .badge .tags { margin-top: 12px; font-weight: bold; font-size: 17px; line-height: 1.25; }
-  .badge .tags div::before { content: "→ "; color: var(--grey-light); }
-
-  .contact { font-size: 10px; color: var(--ink); margin: 6px 0 14px; letter-spacing: .02em; }
+  /* ---------- PAGE 1 HEADER (pozycje w pt = 1:1 z oryginałem PDF) ---------- */
+  .p1-name1, .p1-name2 { position: absolute; left: 33pt; font-family: var(--narrow); font-weight: bold;
+            text-transform: uppercase; font-size: 75pt; line-height: 1; color: var(--ink); letter-spacing: 0; white-space: nowrap; }
+  .p1-name1 { top: 29pt; }
+  .p1-name2 { top: 93pt; }
+  .p1-photo { position: absolute; left: 427.7pt; top: 35.4pt; width: 130.8pt; height: auto;
+              filter: grayscale(1) contrast(1.02); }
+  .p1-badge { position: absolute; left: 360pt; top: 46pt; font-family: var(--narrow); color: var(--grey); }
+  .p1-badge .big { font-weight: bold; font-size: 33pt; line-height: .85; }
+  .p1-badge .yrs { font-weight: bold; font-size: 14pt; line-height: 1.05; white-space: pre-line; margin-top: 2pt; }
+  .p1-badge .tags { font-weight: bold; font-size: 12pt; line-height: 1.3; margin-top: 8pt; }
+  .p1-badge .tags .in { font-weight: normal; font-size: 10pt; }
+  .p1-badge .tags div::before { content: "• "; color: var(--grey); }
+  .p1-contact { position: absolute; left: 33pt; top: 182pt; font-family: var(--narrow); font-size: 14pt; color: var(--ink); }
+  .p1-body { margin-top: 178pt; }   /* zejście poniżej nagłówka */
 
   .profile { position: relative; }
   .profile p { margin-bottom: 9px; max-width: 92%; }
@@ -120,38 +125,32 @@
 
 <!-- ============ PAGE 1 ============ -->
 <div class="page">
-  {% if cv.page_indicator %}<div class="pageno">( <b>1</b> of 3 )</div>{% endif %}
+  <!-- nagłówek: pozycjonowany absolutnie w pt (1:1 z oryginałem), tekst (ATS-friendly) -->
+  <div class="p1-name1">{{ cv.name.split(' ')[0] }}</div>
+  <div class="p1-name2">{{ cv.name.split(' ')[1:]|join(' ') }}</div>
+  <img class="p1-photo" src="{{ cv.photo }}" alt="">
+  <div class="p1-badge">
+    <div class="big">{{ cv.badge.big }}</div>
+    <div class="yrs">{{ cv.badge.small }}</div>
+    <div class="tags"><span class="in">in</span>{% for t in cv.badge.tags %}<div>{{ t }}</div>{% endfor %}</div>
+  </div>
+  <div class="p1-contact">{{ cv.contact.email }} &nbsp;&nbsp;&nbsp; {{ cv.contact.phone }}</div>
 
-  <div class="head">
-    <div class="name">{{ cv.name.split(' ')|join('<br>')|safe }}</div>
-    <div class="head-right">
-      <img class="photo" src="{{ cv.photo }}" alt="">
-      <div class="badge">
-        <div class="big">{{ cv.badge.big }}</div>
-        <div class="yrs">{{ cv.badge.small }}</div>
-        <div class="tags">{% for t in cv.badge.tags %}<div>{{ t }}</div>{% endfor %}</div>
-      </div>
+  <div class="p1-body">
+    <div class="profile">
+      {% for p in cv.profile %}<p>{{ p }}</p>{% endfor %}
+      <div class="tag-right">{{ cv.tag }}</div>
     </div>
+    <div class="lecturer">{{ cv.lecturer }}</div>
+    <div class="h-sec itsme-h">It's me</div>
+    <ul class="bul">
+      {% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}
+    </ul>
+    <div class="addh">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
+    {% for a in cv.additional %}
+    <div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>
+    {% endfor %}
   </div>
-
-  <div class="contact">{{ cv.contact.email }} &nbsp;&nbsp; {{ cv.contact.phone }}</div>
-
-  <div class="profile">
-    {% for p in cv.profile %}<p>{{ p }}</p>{% endfor %}
-    <div class="tag-right">{{ cv.tag }}</div>
-  </div>
-
-  <div class="lecturer">{{ cv.lecturer }}</div>
-
-  <div class="h-sec itsme-h">It's me</div>
-  <ul class="bul">
-    {% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}
-  </ul>
-
-  <div class="addh">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
-  {% for a in cv.additional %}
-  <div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>
-  {% endfor %}
 </div>
 
 <!-- ============ PAGE 2 ============ -->
