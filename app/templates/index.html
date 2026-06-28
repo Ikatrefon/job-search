@@ -34,9 +34,11 @@
   {% if not ads %}
     <p class="text-slate-500 text-sm">Brak ogłoszeń. Wklej pierwsze powyżej.</p>
   {% else %}
-  <div class="space-y-2">
+  <p class="text-xs text-slate-400 mb-2">Przeciągnij uchwytem <span class="text-slate-500">⠿</span>, aby zmienić kolejność.</p>
+  <div class="space-y-2" id="ad-list">
     {% for a in ads %}
-    <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition flex items-center gap-4">
+    <div class="ad-row bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition flex items-center gap-3" data-id="{{ a.id }}">
+      <span class="drag-handle cursor-grab text-slate-300 hover:text-slate-500 select-none text-lg px-1" title="Przeciągnij">⠿</span>
       <a href="/ad/{{ a.id }}" class="flex items-center gap-4 flex-1 min-w-0">
         <div class="w-12 text-center shrink-0">
           {% set s = a.score if a.score is not none else 0 %}
@@ -48,8 +50,6 @@
           <div class="text-xs text-slate-400 truncate">{{ a.kraj }} {% if a.kraj %}·{% endif %} {{ a.created_at }}</div>
         </div>
         {% if a.has_cv %}<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full shrink-0">CV ✓</span>{% endif %}
-        <span class="text-xs px-2 py-1 rounded-full shrink-0
-          {{ {'nowa':'bg-slate-100 text-slate-600','zaakceptowana':'bg-emerald-100 text-emerald-700','odrzucona':'bg-rose-100 text-rose-600','wyeksportowana':'bg-indigo-100 text-indigo-700'}[a.status] }}">{{ a.status }}</span>
       </a>
       <form method="post" action="/ad/{{ a.id }}/delete" class="shrink-0"
             onsubmit="return confirm('Usunąć to ogłoszenie i jego CV?')">
@@ -60,4 +60,19 @@
   </div>
   {% endif %}
 </section>
+
+<script src="https://cdn.jsdelivr.net/npm/sortablejs@1.15.2/Sortable.min.js"></script>
+<script>
+  const list = document.getElementById('ad-list');
+  if (list) {
+    Sortable.create(list, {
+      handle: '.drag-handle', animation: 150, ghostClass: 'opacity-40',
+      onEnd: () => {
+        const ids = [...list.querySelectorAll('.ad-row')].map(r => r.dataset.id);
+        fetch('/reorder', { method:'POST', headers:{'Content-Type':'application/json'},
+                            body: JSON.stringify({ ids }) });
+      }
+    });
+  }
+</script>
 {% endblock %}

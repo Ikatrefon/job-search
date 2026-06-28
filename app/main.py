@@ -1,9 +1,17 @@
 """JOB SEARCH — MVP (etap 1): kanał ręczny → ocena → generacja (guardrail) → PDF → poczekalnia."""
-import json, os
-from fastapi import FastAPI, Form, Request
+import json, os, re
+from fastapi import FastAPI, Form, Request, UploadFile, File
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
 from . import config, db, engine, pdf
+
+def _extract_text(path):
+    if str(path).lower().endswith(".pdf"):
+        import fitz
+        doc = fitz.open(path)
+        return "\n".join(pg.get_text() for pg in doc)
+    try: return path.read_text(encoding="utf-8", errors="ignore")
+    except Exception: return ""
 
 app = FastAPI(title="Job Search — CV automat")
 templates = Jinja2Templates(directory=str(config.APP_DIR / "templates"))
@@ -94,10 +102,17 @@ def get_pdf(ad_id: int):
     return FileResponse(cv["pdf_path"], media_type="application/pdf",
                         filename=f"CV_dopasowane_{ad_id}.pdf")
 
-@app.post("/ad/{ad_id}/status")
-def set_status(ad_id: int, status: str = Form(...)):
-    db.set_status(ad_id, status)
+@app.post("/ad/{ad_id}/meta")
+def update_meta(ad_id: int, tytul: str = Form(""), firma: str = Form(""),
+                kraj: str = Form(""), link: str = Form("")):
+    db.update_ad_meta(ad_id, tytul.strip(), firma.strip(), kraj.strip(), link.strip())
     return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.post("/reorder")
+async def reorder(request: Request):
+    data = await request.json()
+    db.reorder(data.get("ids", []))
+    return {"ok": True}
 
 @app.post("/ad/{ad_id}/delete")
 def delete_ad(ad_id: int):
@@ -133,12 +148,37 @@ def edit_cv(ad_id: int, profile: str = Form(...)):
 
 @app.get("/settings", response_class=HTMLResponse)
 def settings(request: Request):
+    base = engine.load_base_cv()
     return templates.TemplateResponse(request, "settings.html", {
         "threshold": _threshold(),
         "models": config.MODELS,
         "eval_model": db.get_config("eval_model", config.EVAL_MODEL),
         "gen_model": db.get_config("gen_model", config.GEN_MODEL),
-        "mock": config.USE_MOCK})
+        "mock": config.USE_MOCK,
+        "base_cv_name": base.get("name", "Bazowe CV"),
+        "docs": db.list_docs()})
+
+@app.post("/docs/upload")
+async def upload_doc(file: UploadFile = File(...)):
+    if file and file.filename:
+        orig = file.filename
+        safe = re.sub(r"[^A-Za-z0-9._-]", "_", orig)[:60] or "dokument"
+        did = db.add_doc(orig, safe)
+        dest = config.DOCS_DIR / f"{did}_{safe}"
+        dest.write_bytes(await file.read())
+        (config.DOCS_DIR / f"{did}.txt").write_text(_extract_text(dest), encoding="utf-8")
+    return RedirectResponse("/settings", status_code=303)
+
+@app.post("/docs/{doc_id}/delete")
+def delete_doc(doc_id: int):
+    if db.get_doc(doc_id):
+        for f in config.DOCS_DIR.glob(f"{doc_id}_*"):
+            try: f.unlink()
+            except OSError: pass
+        sidecar = config.DOCS_DIR / f"{doc_id}.txt"
+        if sidecar.exists(): sidecar.unlink()
+        db.del_doc(doc_id)
+    return RedirectResponse("/settings", status_code=303)
 
 @app.post("/settings")
 def save_settings(threshold: int = Form(...), eval_model: str = Form(...), gen_model: str = Form(...)):

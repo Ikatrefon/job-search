@@ -19,6 +19,7 @@ CV_BASE_JSON = TEMPLATE_DIR / "cv.json"                     # bazowe CV = źród
 
 DATA_DIR = APP_DIR / "data"
 PDF_DIR = DATA_DIR / "pdfs"
+DOCS_DIR = DATA_DIR / "docs"          # dodatkowe dokumenty kandydata
 DB_PATH = DATA_DIR / "jobsearch.db"
 
 # Anthropic — ocena tania/szybka, generacja mocniejsza
@@ -41,5 +42,5 @@ DEFAULT_THRESHOLD = int(os.environ.get("JS_THRESHOLD", "60"))
 
 USE_MOCK = not bool(ANTHROPIC_API_KEY)                      # bez klucza → tryb mock (pipeline działa offline)
 
-for d in (DATA_DIR, PDF_DIR):
+for d in (DATA_DIR, PDF_DIR, DOCS_DIR):
     d.mkdir(parents=True, exist_ok=True)

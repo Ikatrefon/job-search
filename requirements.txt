@@ -4,3 +4,4 @@ anthropic
 jinja2
 python-multipart
 playwright
+pymupdf

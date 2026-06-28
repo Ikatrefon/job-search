@@ -14,6 +14,16 @@ def _gen_model(): return db.get_config("gen_model", config.GEN_MODEL)
 def load_base_cv():
     return json.loads(config.CV_BASE_JSON.read_text(encoding="utf-8"))
 
+def extra_context():
+    """Tekst dodatkowych dokumentów kandydata (sidecar .txt per dokument)."""
+    parts = []
+    for d in db.list_docs():
+        p = config.DOCS_DIR / (str(d["id"]) + ".txt")
+        if p.exists():
+            t = p.read_text(encoding="utf-8", errors="ignore").strip()
+            if t: parts.append(f"--- {d['orig']} ---\n{t}")
+    return "\n\n".join(parts)
+
 def cv_to_text(cv):
     """Bazowe CV jako zwięzły tekst do promptu/oceny."""
     parts = [cv.get("name",""), " ".join(cv.get("profile",[])), cv.get("lecturer","")]
@@ -63,6 +73,8 @@ def evaluate(ad, base_cv, model=None):
     if config.USE_MOCK:
         return _mock_evaluate(ad, base_cv)
     cv_text = cv_to_text(base_cv)
+    extra = extra_context()
+    if extra: cv_text += "\n\nDODATKOWE DOKUMENTY KANDYDATA:\n" + extra
     msg = _client().messages.create(
         model=model or _eval_model(), max_tokens=1400,
         system=[{"type":"text","text":"BASE CV:\n"+cv_text,"cache_control":{"type":"ephemeral"}},
@@ -84,9 +96,12 @@ def generate(ad, base_cv, summary):
     if config.USE_MOCK:
         return _mock_generate(ad, base_cv, summary)
     cv_json = json.dumps(base_cv, ensure_ascii=False)
+    extra = extra_context()
+    sys_cv = "BASE CV (JSON):\n" + cv_json
+    if extra: sys_cv += "\n\nDODATKOWE DOKUMENTY KANDYDATA (prawdziwy materiał — wolno z niego czerpać):\n" + extra
     msg = _client().messages.create(
         model=_gen_model(), max_tokens=4000,
-        system=[{"type":"text","text":"BASE CV (JSON):\n"+cv_json,"cache_control":{"type":"ephemeral"}},
+        system=[{"type":"text","text":sys_cv,"cache_control":{"type":"ephemeral"}},
                 {"type":"text","text":GEN_SYS}],
         messages=[{"role":"user","content":_ad_text(ad)+f"\n\nMATCH SUMMARY:\n{summary}"}])
     d = _extract_json(msg.content[0].text)
@@ -116,6 +131,7 @@ def guardrail(base_cv, cv):
     Zwraca (oczyszczone_cv, ostrzeżenia[])."""
     warn = []
     out = copy.deepcopy(cv)
+    extra_tok = _tokens(extra_context())   # treść dokumentów też = „prawda"
 
     # tożsamość i kontakt — zawsze z bazy
     for k in ("name","contact","photo","badge","signature"):
@@ -131,6 +147,7 @@ def guardrail(base_cv, cv):
         e["company"], e["role"], e["dates"], e["logo"] = b["company"], b["role"], b["dates"], b.get("logo")
         if "aside" in b: e["aside"] = b["aside"]
         base_tok = set().union(*[_tokens(x) for x in b.get("bullets",[])]) if b.get("bullets") else set()
+        base_tok |= extra_tok
         for blt in e.get("bullets",[]):
             t = _tokens(blt)
             if t and base_tok and len(t & base_tok)/len(t) < 0.45:

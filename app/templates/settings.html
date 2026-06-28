@@ -40,4 +40,39 @@
     <span class="text-xs text-slate-500">{% if mock %}⚠ tryb MOCK (brak klucza API){% else %}✓ połączone z Claude API{% endif %}</span>
   </div>
 </form>
+
+<!-- Dokumenty kandydata (osobno od formularza ustawień) -->
+<section class="bg-white rounded-xl shadow-sm p-5 max-w-2xl mt-6">
+  <h2 class="font-semibold text-slate-900 mb-1">Dokumenty kandydata</h2>
+  <p class="text-xs text-slate-500 mb-4">Bazowe CV jest rdzeniem szablonu PDF. Dodatkowe dokumenty (portfolio, osiągnięcia, inne wersje CV, referencje…) wzbogacają <b>ocenę i generację</b> — model może z nich czerpać prawdziwy materiał, bez zmyślania. Obsługiwane: PDF, TXT, MD.</p>
+
+  <div class="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2.5 mb-3 bg-slate-50">
+    <span>📄</span>
+    <span class="text-sm text-slate-700 flex-1">{{ base_cv_name }}</span>
+    <span class="text-xs text-slate-400">bazowe CV (rdzeń szablonu)</span>
+  </div>
+
+  {% if docs %}
+  <div class="space-y-2 mb-4">
+    {% for d in docs %}
+    <div class="flex items-center gap-2 border border-slate-200 rounded-lg px-3 py-2.5">
+      <span>📎</span>
+      <span class="text-sm text-slate-700 flex-1 truncate">{{ d.orig }}</span>
+      <span class="text-xs text-slate-400">{{ d.created_at[:10] }}</span>
+      <form method="post" action="/docs/{{ d.id }}/delete" onsubmit="return confirm('Usunąć ten dokument?')">
+        <button title="Usuń" class="text-slate-300 hover:text-rose-500 text-lg leading-none px-1">✕</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% else %}
+  <p class="text-sm text-slate-400 mb-4">Brak dodatkowych dokumentów.</p>
+  {% endif %}
+
+  <form method="post" action="/docs/upload" enctype="multipart/form-data" class="flex items-center gap-2">
+    <input type="file" name="file" required accept=".pdf,.txt,.md,.markdown"
+           class="text-sm flex-1 file:mr-3 file:rounded-lg file:border-0 file:bg-slate-200 file:px-3 file:py-1.5 file:text-sm file:text-slate-700">
+    <button class="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-700">Dodaj dokument</button>
+  </form>
+</section>
 {% endblock %}
