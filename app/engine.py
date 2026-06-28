@@ -43,8 +43,12 @@ def _extract_json(txt):
     txt = txt.strip()
     if txt.startswith("```"):
         txt = re.sub(r"^```[a-zA-Z]*\n?", "", txt); txt = re.sub(r"\n?```$", "", txt)
-    a, b = txt.find("{"), txt.rfind("}")
-    return json.loads(txt[a:b+1])
+    a = txt.find("{")
+    if a < 0:
+        raise ValueError("brak JSON w odpowiedzi modelu")
+    # weź PIERWSZY kompletny obiekt JSON, zignoruj ewentualny tekst po nim (np. komentarz Opusa)
+    obj, _ = json.JSONDecoder().raw_decode(txt[a:])
+    return obj
 
 # ---------- ANTHROPIC ----------
 def _client():
