@@ -40,24 +40,21 @@
   .p1-top svg { width: 100%; height: auto; display: block; }
   .p1-body { margin-top: 188pt; }   /* zejście poniżej nagłówka SVG */
 
-  .profile { position: relative; }
-  .profile p { margin-bottom: 9px; max-width: 92%; }
-  .tag-right { position: absolute; right: 0; bottom: 0; font-family: var(--narrow); font-weight: bold;
-               font-size: 15px; color: var(--grey); }
-
-  .lecturer { font-family: var(--body); font-style: italic; color: #444; margin: 6px 0 10px; font-size: 9px; }
-
-  .h-sec { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
-           letter-spacing: .03em; }
-  .itsme-h { font-size: 17px; margin: 4px 0 6px; }
+  /* ---------- PAGE 1 — BLOKI TEKSTU ---------- */
+  /* górny blok: Arial Narrow 14pt, 3 sekcje (profil ×2 + lecturer) */
+  .blk-top { font-family: var(--narrow); font-size: 14pt; line-height: 1.2; color: var(--ink); }
+  .blk-top p { margin: 0 0 9pt; }
+  /* dolny blok: Arial Narrow 12pt, 2 sekcje (It's me + additional) */
+  .blk-bot { font-family: var(--narrow); font-size: 12pt; line-height: 1.2; margin-top: 12pt; }
+  .blk-bot section { margin-bottom: 10pt; }
+  .sec-h { font-family: var(--narrow); font-weight: bold; font-size: 12pt; margin-bottom: 4pt; }
 
   ul.bul { list-style: none; }
-  ul.bul li { position: relative; padding-left: 12px; margin-bottom: 2.5px; }
+  ul.bul li { position: relative; padding-left: 11pt; margin-bottom: 1.5pt; }
   ul.bul li::before { content: "•"; position: absolute; left: 0; color: var(--ink); }
 
-  .addh { font-size: 13px; margin: 12px 0 5px; font-family: var(--narrow); font-weight: bold; }
-  .add-item { margin-bottom: 6px; }
-  .add-item b { font-family: var(--narrow); }
+  .add-item { margin-bottom: 4pt; }
+  .add-item b { font-weight: bold; }
 
   /* ---------- PAGE 2/3 EXPERIENCE ---------- */
   .h-big { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
@@ -120,19 +117,23 @@
   <div class="p1-top">{{ top_svg|safe }}</div>
 
   <div class="p1-body">
-    <div class="profile">
+    <!-- GÓRNY BLOK: Arial Narrow 14pt, 3 sekcje -->
+    <div class="blk-top">
       {% for p in cv.profile %}<p>{{ p }}</p>{% endfor %}
-      <div class="tag-right">{{ cv.tag }}</div>
+      <p>{{ cv.lecturer }}</p>
     </div>
-    <div class="lecturer">{{ cv.lecturer }}</div>
-    <div class="h-sec itsme-h">It's me</div>
-    <ul class="bul">
-      {% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}
-    </ul>
-    <div class="addh">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
-    {% for a in cv.additional %}
-    <div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>
-    {% endfor %}
+
+    <!-- DOLNY BLOK: Arial Narrow 12pt, 2 sekcje -->
+    <div class="blk-bot">
+      <section>
+        <div class="sec-h">It's me</div>
+        <ul class="bul">{% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}</ul>
+      </section>
+      <section>
+        <div class="sec-h">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
+        {% for a in cv.additional %}<div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>{% endfor %}
+      </section>
+    </div>
   </div>
 </div>
 
