@@ -34,9 +34,8 @@
   .pageno b { color: var(--grey); }
 
   /* ---------- PAGE 1 HEADER (pozycje w pt = 1:1 z oryginałem PDF) ---------- */
-  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; height: auto; }  /* szer. = kolumna tekstu (marginesy 12mm) */
-  .p1-contact { position: absolute; left: 34pt; top: 192pt; font-family: var(--narrow); font-size: 14pt; color: var(--ink); }
-  .p1-body { margin-top: 178pt; }   /* zejście poniżej nagłówka SVG + kontaktu */
+  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; height: auto; }  /* szer. = kolumna tekstu (marginesy 12mm); SVG zawiera nazwisko+badge+zdjęcie+kontakt */
+  .p1-body { margin-top: 188pt; }   /* zejście poniżej nagłówka SVG */
 
   .profile { position: relative; }
   .profile p { margin-bottom: 9px; max-width: 92%; }
@@ -114,10 +113,8 @@
 
 <!-- ============ PAGE 1 ============ -->
 <div class="page">
-  <!-- nagłówek graficzny: gotowy SVG od użytkownika (1:1) -->
-  <img class="p1-top" src="assets/top.svg" alt="Michał Duchowski">
-  <!-- kontakt jako prawdziwy tekst (czytelny dla ATS) -->
-  <div class="p1-contact">{{ cv.contact.email }} &nbsp;&nbsp;&nbsp; {{ cv.contact.phone }}</div>
+  <!-- nagłówek graficzny: gotowy SVG od użytkownika (1:1, zawiera też mail+telefon) -->
+  <img class="p1-top" src="assets/top.svg" alt="Michał Duchowski — michal.duchowski@gmail.com +48 501 949 481">
 
   <div class="p1-body">
     <div class="profile">
