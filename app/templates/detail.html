@@ -103,7 +103,7 @@
       <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-semibold text-slate-900">Dopasowane CV {% if cv.edited %}<span class="text-xs text-indigo-600">(edytowane)</span>{% endif %}</h2>
-          <a href="/pdf/{{ ad.id }}" class="text-sm bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700">Pobierz PDF</a>
+          <a href="/pdf/{{ ad.id }}" download="CV_{{ ad.id }}.pdf" class="text-sm bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700">Pobierz PDF</a>
         </div>
         {% if cv.justification %}<p class="text-sm text-slate-600 italic mb-3">{{ cv.justification }}</p>{% endif %}
         {% if warnings %}

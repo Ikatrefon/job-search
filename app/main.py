@@ -99,8 +99,9 @@ def get_pdf(ad_id: int):
     cv = db.get_cv(ad_id)
     if not cv or not cv.get("pdf_path"):
         return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+    # inline → iframe wyświetla podgląd zamiast pobierać; pobieranie wymusza atrybut download na linku
     return FileResponse(cv["pdf_path"], media_type="application/pdf",
-                        filename=f"CV_dopasowane_{ad_id}.pdf")
+                        headers={"Content-Disposition": "inline"})
 
 @app.post("/ad/{ad_id}/meta")
 def update_meta(ad_id: int, tytul: str = Form(""), firma: str = Form(""),
