@@ -34,21 +34,9 @@
   .pageno b { color: var(--grey); }
 
   /* ---------- PAGE 1 HEADER (pozycje w pt = 1:1 z oryginałem PDF) ---------- */
-  .p1-name1, .p1-name2 { position: absolute; left: 33pt; font-family: var(--narrow); font-weight: bold;
-            text-transform: uppercase; font-size: 75pt; line-height: 1; color: var(--ink); letter-spacing: 0;
-            white-space: nowrap; transform: scaleX(0.73); transform-origin: left top; }
-  .p1-name1 { top: 29pt; }
-  .p1-name2 { top: 93pt; }
-  .p1-photo { position: absolute; left: 427.7pt; top: 35.4pt; width: 130.8pt; height: auto;
-              filter: grayscale(1) contrast(1.02); }
-  .p1-badge { position: absolute; left: 360pt; top: 46pt; font-family: var(--narrow); color: var(--grey); }
-  .p1-badge .big { font-weight: bold; font-size: 33pt; line-height: .85; }
-  .p1-badge .yrs { font-weight: bold; font-size: 14pt; line-height: 1.05; white-space: pre-line; margin-top: 2pt; }
-  .p1-badge .tags { font-weight: bold; font-size: 12pt; line-height: 1.3; margin-top: 8pt; }
-  .p1-badge .tags .in { font-weight: normal; font-size: 10pt; }
-  .p1-badge .tags div::before { content: "• "; color: var(--grey); }
-  .p1-contact { position: absolute; left: 33pt; top: 182pt; font-family: var(--narrow); font-size: 14pt; color: var(--ink); }
-  .p1-body { margin-top: 178pt; }   /* zejście poniżej nagłówka */
+  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; height: auto; }  /* szer. = kolumna tekstu (marginesy 12mm) */
+  .p1-contact { position: absolute; left: 34pt; top: 192pt; font-family: var(--narrow); font-size: 14pt; color: var(--ink); }
+  .p1-body { margin-top: 178pt; }   /* zejście poniżej nagłówka SVG + kontaktu */
 
   .profile { position: relative; }
   .profile p { margin-bottom: 9px; max-width: 92%; }
@@ -126,15 +114,9 @@
 
 <!-- ============ PAGE 1 ============ -->
 <div class="page">
-  <!-- nagłówek: pozycjonowany absolutnie w pt (1:1 z oryginałem), tekst (ATS-friendly) -->
-  <div class="p1-name1">{{ cv.name.split(' ')[0] }}</div>
-  <div class="p1-name2">{{ cv.name.split(' ')[1:]|join(' ') }}</div>
-  <img class="p1-photo" src="{{ cv.photo }}" alt="">
-  <div class="p1-badge">
-    <div class="big">{{ cv.badge.big }}</div>
-    <div class="yrs">{{ cv.badge.small }}</div>
-    <div class="tags"><span class="in">in</span>{% for t in cv.badge.tags %}<div>{{ t }}</div>{% endfor %}</div>
-  </div>
+  <!-- nagłówek graficzny: gotowy SVG od użytkownika (1:1) -->
+  <img class="p1-top" src="assets/top.svg" alt="Michał Duchowski">
+  <!-- kontakt jako prawdziwy tekst (czytelny dla ATS) -->
   <div class="p1-contact">{{ cv.contact.email }} &nbsp;&nbsp;&nbsp; {{ cv.contact.phone }}</div>
 
   <div class="p1-body">
