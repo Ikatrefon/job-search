@@ -1,0 +1,63 @@
+{% extends "base.html" %}
+{% block content %}
+
+<!-- overlay ładowania (pełne przetwarzanie trwa ~30-60 s) -->
+<div id="overlay" class="hidden fixed inset-0 bg-slate-900/60 z-50 flex items-center justify-center p-6">
+  <div class="bg-white rounded-2xl shadow-xl px-8 py-7 text-center max-w-xs">
+    <div class="mx-auto mb-4 h-10 w-10 rounded-full border-4 border-slate-200 border-t-slate-800 animate-spin"></div>
+    <p class="font-medium text-slate-900">Oceniam dopasowanie…</p>
+    <p class="text-sm text-slate-500 mt-1">wnikliwa analiza, do ~30 s<br>nie zamykaj strony</p>
+  </div>
+</div>
+
+<!-- Wklej ogłoszenie -->
+<section class="bg-white rounded-xl shadow-sm p-5">
+  <h2 class="font-semibold text-slate-900 mb-3">Wklej ogłoszenie</h2>
+  <form method="post" action="/paste" class="space-y-3" onsubmit="document.getElementById('overlay').classList.remove('hidden')">
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3">
+      <input name="tytul" placeholder="Tytuł stanowiska" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="firma" placeholder="Firma" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="kraj" placeholder="Kraj" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="link" placeholder="Link (opcjonalnie)" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+    </div>
+    <textarea name="opis" required rows="8" placeholder="Wklej pełną treść ogłoszenia…"
+              class="w-full border border-slate-300 rounded-lg px-3 py-2 text-sm"></textarea>
+    <button class="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-700">
+      Oceń i dopasuj CV
+    </button>
+  </form>
+</section>
+
+<!-- Poczekalnia -->
+<section class="mt-7">
+  <h2 class="font-semibold text-slate-900 mb-3">Poczekalnia <span class="text-slate-400 font-normal">({{ ads|length }})</span></h2>
+  {% if not ads %}
+    <p class="text-slate-500 text-sm">Brak ogłoszeń. Wklej pierwsze powyżej.</p>
+  {% else %}
+  <div class="space-y-2">
+    {% for a in ads %}
+    <div class="bg-white rounded-xl shadow-sm p-4 hover:shadow-md transition flex items-center gap-4">
+      <a href="/ad/{{ a.id }}" class="flex items-center gap-4 flex-1 min-w-0">
+        <div class="w-12 text-center shrink-0">
+          {% set s = a.score if a.score is not none else 0 %}
+          <div class="text-2xl font-bold {{ 'text-emerald-600' if s>=threshold else 'text-slate-400' }}">{{ s }}</div>
+          <div class="text-[10px] text-slate-400 uppercase tracking-wide">score</div>
+        </div>
+        <div class="flex-1 min-w-0">
+          <div class="font-medium text-slate-900 truncate">{{ a.tytul or "(bez tytułu)" }}{% if a.firma %} · <span class="text-slate-500 font-normal">{{ a.firma }}</span>{% endif %}</div>
+          <div class="text-xs text-slate-400 truncate">{{ a.kraj }} {% if a.kraj %}·{% endif %} {{ a.created_at }}</div>
+        </div>
+        {% if a.has_cv %}<span class="text-xs bg-emerald-100 text-emerald-700 px-2 py-1 rounded-full shrink-0">CV ✓</span>{% endif %}
+        <span class="text-xs px-2 py-1 rounded-full shrink-0
+          {{ {'nowa':'bg-slate-100 text-slate-600','zaakceptowana':'bg-emerald-100 text-emerald-700','odrzucona':'bg-rose-100 text-rose-600','wyeksportowana':'bg-indigo-100 text-indigo-700'}[a.status] }}">{{ a.status }}</span>
+      </a>
+      <form method="post" action="/ad/{{ a.id }}/delete" class="shrink-0"
+            onsubmit="return confirm('Usunąć to ogłoszenie i jego CV?')">
+        <button title="Usuń" class="text-slate-300 hover:text-rose-500 text-xl leading-none px-1">✕</button>
+      </form>
+    </div>
+    {% endfor %}
+  </div>
+  {% endif %}
+</section>
+{% endblock %}

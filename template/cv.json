@@ -1,0 +1,114 @@
+{
+  "name": "MICHAL DUCHOWSKI",
+  "photo": "assets/photo.png",
+  "page_indicator": true,
+  "badge": { "big": "15+", "small": "years\nof experience", "tags": ["agencies", "corporations"] },
+  "contact": { "email": "michal.duchowski@gmail.com", "phone": "+48 501 949 481" },
+  "tag": "AI enthusiast.",
+  "profile": [
+    "Experienced manager. Experienced in the management of multidisciplinary designers teams (small and big, domestic and international), responsible for hiring, motivating, talent development, mentoring cross-functional team members, enhancing team spirit, efficiency, coaching, inspiring, team building, etc. Maintaining a high-level and diverse team culture.",
+    "Practicioner of UX and Design Thinking approach and agile methodologies – co-working, co-creation, customer-centric, based on permanent, very different research on every stage of a specific project/task - converting results into meaningful insights and further into a valuable product."
+  ],
+  "lecturer": "Lecturer at the Polish Japanese Academy of Information Technology Warsaw - faculty of UX design",
+  "itsme": [
+    "Working on UX/UI Design field for all types of screens - digital and tangible touchpoints",
+    "Managing the integration of AI tools into the UX design process",
+    "Actively developing new AI-powered tools and services",
+    "Upskilling team members on a wide range of AI subjects",
+    "Taking an active part in building and developing Design Systems for big global brands",
+    "Co-creating, co-working, conducting of brainstorms / workshops with an engaged team and clients",
+    "Conducting design projects based on the newest agile / human-centered / design thinking methodologies",
+    "Designing of research assumptions and its scenarios regarding current goals",
+    "Testing assumptions, concepts, and prototypes with end users (also with experts / clients)",
+    "Analyzing qualitative and quantitative results of research - converting them into useful insights",
+    "Tracking measurable parameters of projects, gathering conclusions for the future",
+    "Effective collaboration with product management, product development, and business owners",
+    "Being up to date with the newest trends and technologies (also software) - sharing this knowledge",
+    "Preparing dedicated procedures and processes due to optimizing workflow and achieving the best results",
+    "Building, developing, managing and taking care of design teams members - UX / UI / Motion / Graphic designers",
+    "Promoting of open and diverse team culture and key values like empathy, respect, curiosity"
+  ],
+  "additional": [
+    { "label": "Creativity", "text": "I worked in a few advertising agencies in the Creative departments. Positions from Junior Art Director to Creative Director. Inventing creative ideas by myself and managing as a leader, pipelines of creative processes, was exactly what I did for a living." },
+    { "label": "Architecture", "text": "I'm a co-author (as an interior designer) of 4 metro stations and 1 railway station in Warsaw / Poland. A remarkable and unique experience of being part of huuuuge public projects." }
+  ],
+  "experience": [
+    { "company": "ASSEMBLY", "logo": "assets/assembly.png", "role": "Head of UX Design", "dates": "04.2024 - NOW",
+      "aside": { "text": "Lecturer\nfaculty of UX Design", "logo": "assets/pjatk.png" },
+      "bullets": [
+        "Leading a team of UX Designers - all aspects",
+        "Driving the implementation and management of AI tools within UX design processes",
+        "Proactively designing and launching new AI-driven tools and services",
+        "Educating and upskilling cross-functional teams on diverse AI concepts"
+      ] },
+    { "company": "Publicis Le Pont", "logo": "assets/publicis.png", "role": "Head of UX/UI Design", "dates": "07.2023 - 03.2025",
+      "bullets": [
+        "Leading a team of UX/UI designers (all aspects of being a leader)",
+        "Conducting and overseeing projects for global clients on a UI/UX scope",
+        "Active participation in design ops activities and building Design Systems"
+      ] },
+    { "company": "Capgemini", "logo": "assets/capgemini.png", "role": "UX/UI Design manager - team leader", "dates": "04.2022 - 04.2023",
+      "bullets": [
+        "Building, developing, and leading a team of UX/UI designers",
+        "Actively looking for business opportunities, working on best offer preparations",
+        "Taking care of visibility and good PR of the whole team within the company",
+        "Running Digital / Web / Mobile / Creative projects for clients (from all over the world)",
+        "Conducting design workshops with clients and the team - all based on the newest agile / human-centered"
+      ] },
+    { "company": "accenture", "logo": "assets/accenture.png", "role": "Creative leader - Global Team", "dates": "02.2021 - 01.2022",
+      "bullets": [
+        "Taking part in the co-building and development of OneAccenture - a global design and creation governance team",
+        "Establishing and developing a design and creative service team in Poland - the fourth design / creative hub in the world within Accenture",
+        "Conducting international team of designers (graphic / motion / UX / UI) - projects (digital communication, web, mobile) coordination, keeping eye on creative direction, functionalities, business purposes, and overall results"
+      ] },
+    { "company": "IKEA", "logo": "assets/ikea.png", "role": "Graphic Communication Country Leader", "dates": "02.2017 - 01.2020",
+      "bullets": [
+        "Leading team of designers spread out in 11 stores in Poland. Building trustful relationships in the team. Coaching, supporting, and acting in the matrix manager",
+        "Ensuring effectiveness, proper tone of voice, and consistency of IKEA communication in all touchpoints",
+        "Implementing innovations, a new way of working and new technology, e.g.: including digital communication as an indispensable part of graphic designers' work scope; developing research as a permanent manner of checking assumed goals (e.g.: eye-tracking research on Customer Guidance System effectiveness in Poland); based on the best agile / design thinking methodologies designing and implementing of Digital Wayfinders System (interactive in-store maps) in Poland; setting UX / agile / design thinking / customer-centric approach as an axis of mindset among members of the design team"
+      ] },
+    { "company": "GEMACO", "logo": null, "role": "Creative Director", "dates": "10.2015 - 01.2017",
+      "bullets": [
+        "Preparing a creative strategy for local and global GEMACO clients in close cooperation with 14 foreign GEMACO branches",
+        "Active participation in acquiring new clients",
+        "Management of design team - graphic / motion / UX / UI designers",
+        "Providing pieces of training for co-workers. Taking care of team spirit, self-development of team members",
+        "Responsible for the design department's budget"
+      ] },
+    { "company": "d-well", "logo": "assets/dwell.png", "role": "Design manager", "dates": "09.2010 - 02.2011",
+      "bullets": [
+        "Managing a team of POSM designers. Being in charge of hiring, developing, setting processes, and overall results",
+        "Preparation assumptions (briefs) for designing POSM materials based on the client's goals and needs",
+        "Strict cooperation with construction and production departments and external supplier",
+        "Together with the team, co-creation, and implementation of innovative ideas in the context of market needs, customer insights, technological background, etc.",
+        "Conducting permanent surveys on customers' shopping habits",
+        "Monitoring of market background, target groups, trend sales data, etc.",
+        "Searching for innovative solutions and opportunities to expand the business",
+        "Taking care of good perception of the company in the market"
+      ] },
+    { "company": "GREY", "logo": "assets/grey.png", "role": "Creative Group Head", "dates": "09.2005 - 03.2010",
+      "bullets": [
+        "Management of whole activities of several creative teams",
+        "Taking care of employee development and competencies growth",
+        "Co-creation strategy of launching and communication of brands and products",
+        "Establishing and taking care of good relationships with clients"
+      ] }
+  ],
+  "education": {
+    "school": "SWPS UNIVERSITY",
+    "logo": "assets/swps.png",
+    "fields": ["MBA IT", "UX DESIGN", "INDUSTRIAL DESIGN", "INTERNET MARKETING", "BUSINESS STUDIES"]
+  },
+  "about_me": ["Curious", "Open", "Collaborative", "Proactive", "Positive", "Flexible", "Thinker & Doer", "Communicative", "Pragmatic", "Empathic", "Analytic", "but synthetic as well", "I learn quickly", "Fan of humankind", "Trainer"],
+  "interests": ["Users - people", "Users - Experience", "Neuro Science", "AI", "Science (general)", "Design", "Communication", "Technology", "Books", "Knowledge", "Journeys", "No any sports, I'm a walker (20k steps per day)"],
+  "tech_skills": ["English", "Adobe CC", "Figma", "Sketch", "MIRO", "Mural", "3ds MAX", "Jira / Teamwork", "Slack", "Office", "Video editing", "Animations"],
+  "quotes": [
+    { "text": "Life is like riding a bicycle. To keep your balance, you must keep moving.", "author": "Albert Einstein" },
+    { "text": "I would never die for my beliefs because I might be wrong.", "author": "Bertrand Russel" },
+    { "text": "There is nothing permanent except change", "author": "Heraclitus" },
+    { "text": "Everyone has a plan until they get punched in the mouth.", "author": "Mike Tyson" },
+    { "text": "I believe creativity is an inherent part of everyone", "author": "Kermit the Frog" },
+    { "text": "...so many books, so little time...", "author": "Frank Zappa" }
+  ],
+  "signature": "Michal Duchowski"
+}

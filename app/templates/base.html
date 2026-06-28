@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="pl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>{% block title %}Job Search — CV automat{% endblock %}</title>
+<script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-slate-100 text-slate-800 min-h-screen">
+  <header class="bg-slate-900 text-white">
+    <div class="max-w-5xl mx-auto px-5 py-3 flex items-center justify-between">
+      <a href="/" class="font-semibold tracking-tight text-lg">CV&nbsp;automat <span class="text-slate-400 font-normal text-sm">· job search</span></a>
+      <nav class="flex items-center gap-4">
+        {% if mock %}<span class="text-xs bg-amber-400 text-slate-900 px-2 py-1 rounded-full font-medium">tryb MOCK</span>{% endif %}
+        <a href="/" class="text-sm text-slate-300 hover:text-white">Poczekalnia</a>
+        <a href="/settings" class="text-sm text-slate-300 hover:text-white">Ustawienia</a>
+      </nav>
+    </div>
+  </header>
+  <main class="max-w-5xl mx-auto px-5 py-6">
+    {% block content %}{% endblock %}
+  </main>
+</body>
+</html>

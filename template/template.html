@@ -1,0 +1,228 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 0; }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #161616;
+    --grey: #8c8c8c;
+    --grey-light: #b9b9b9;
+    --line: #d8d8d8;
+    --narrow: "Arial Narrow", "Liberation Sans Narrow", Arial, sans-serif;
+    --body: Arial, "Liberation Sans", Helvetica, sans-serif;
+  }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: var(--body); color: var(--ink); font-size: 9.2px; line-height: 1.35; }
+
+  .page {
+    position: relative;
+    width: 210mm; height: 297mm;
+    padding: 13mm 12mm 10mm;
+    overflow: hidden;
+    background: #fff;
+  }
+  .page + .page { page-break-before: always; }
+
+  .pageno { position: absolute; top: 11mm; right: 12mm; font-family: var(--narrow); font-weight: bold;
+            font-size: 19px; color: var(--grey-light); letter-spacing: .02em; }
+  .pageno b { color: var(--grey); }
+
+  /* ---------- PAGE 1 HEADER ---------- */
+  .head { display: flex; justify-content: space-between; align-items: flex-start; min-height: 150px; }
+  .name { font-family: var(--narrow); font-weight: bold; font-size: 73px; line-height: .9;
+          text-transform: uppercase; letter-spacing: 0; }
+  .head-right { position: relative; width: 250px; height: 150px; }
+  .photo { position: absolute; right: 0; top: 6px; width: 130px; height: auto;
+           filter: grayscale(1) contrast(1.02); }
+  .badge { position: absolute; left: 0; top: 30px; font-family: var(--narrow); color: var(--grey); }
+  .badge .big { font-weight: bold; font-size: 46px; line-height: .8; }
+  .badge .yrs { font-weight: bold; font-size: 19px; line-height: 1; margin-top: 2px; white-space: pre-line; }
+  .badge .tags { margin-top: 12px; font-weight: bold; font-size: 17px; line-height: 1.25; }
+  .badge .tags div::before { content: "→ "; color: var(--grey-light); }
+
+  .contact { font-size: 10px; color: var(--ink); margin: 6px 0 14px; letter-spacing: .02em; }
+
+  .profile { position: relative; }
+  .profile p { margin-bottom: 9px; max-width: 92%; }
+  .tag-right { position: absolute; right: 0; bottom: 0; font-family: var(--narrow); font-weight: bold;
+               font-size: 15px; color: var(--grey); }
+
+  .lecturer { font-family: var(--body); font-style: italic; color: #444; margin: 6px 0 10px; font-size: 9px; }
+
+  .h-sec { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
+           letter-spacing: .03em; }
+  .itsme-h { font-size: 17px; margin: 4px 0 6px; }
+
+  ul.bul { list-style: none; }
+  ul.bul li { position: relative; padding-left: 12px; margin-bottom: 2.5px; }
+  ul.bul li::before { content: "•"; position: absolute; left: 0; color: var(--ink); }
+
+  .addh { font-size: 13px; margin: 12px 0 5px; font-family: var(--narrow); font-weight: bold; }
+  .add-item { margin-bottom: 6px; }
+  .add-item b { font-family: var(--narrow); }
+
+  /* ---------- PAGE 2/3 EXPERIENCE ---------- */
+  .h-big { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
+           font-size: 13px; letter-spacing: .05em; margin-bottom: 9px; color: var(--grey); }
+  .tagline { font-family: var(--narrow); font-weight: bold; color: var(--grey-light);
+             text-transform: uppercase; font-size: 14px; }
+
+  .job { margin-bottom: 13px; }
+  .job-head { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line);
+              padding-bottom: 5px; margin-bottom: 5px; position: relative; }
+  .job-logo { height: 40px; width: auto; max-width: 150px; object-fit: contain; }
+  .job-logo.text { font-family: var(--narrow); font-weight: bold; font-size: 30px; color: var(--ink); }
+  .job-role { font-family: var(--narrow); font-weight: bold; font-size: 15px; text-transform: uppercase;
+              letter-spacing: .02em; }
+  .job-dates { margin-left: auto; font-family: var(--narrow); font-weight: bold; color: var(--grey);
+               font-size: 13px; white-space: nowrap; }
+  .job .aside { float: right; width: 120px; text-align: center; margin: 0 0 6px 10px; color: var(--grey);
+                font-style: italic; font-size: 8.5px; }
+  .job .aside img { display: block; width: 54px; margin: 0 auto 3px; }
+
+  /* page 3 earlier jobs — two columns */
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+
+  /* ---------- EDUCATION ---------- */
+  .edu { margin-top: 6px; }
+  .edu-fields { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 0 14px; }
+  .edu-fields span { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
+                     font-size: 18px; line-height: 1; color: var(--ink); white-space: nowrap; }
+  .edu-school { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .edu-school img { height: 34px; }
+  .edu-school b { font-family: var(--narrow); font-weight: bold; font-size: 13px; color: var(--grey);
+                  text-transform: uppercase; letter-spacing: .04em; }
+
+  /* ---------- MORE ABOUT ME ---------- */
+  .about { display: grid; grid-template-columns: 1fr 1fr 1fr 1.25fr; gap: 0 18px; margin-top: 6px; }
+  .about col, .about .col { }
+  .col-h { font-family: var(--narrow); font-weight: bold; text-transform: uppercase; color: var(--grey);
+           font-size: 12px; letter-spacing: .04em; margin-bottom: 6px; border-bottom: 1px solid var(--line);
+           padding-bottom: 3px; }
+  .col ul { list-style: none; }
+  .col li { margin-bottom: 3px; }
+  .quote { margin-bottom: 8px; }
+  .quote .q { font-style: italic; }
+  .quote .a { color: var(--grey); font-size: 8px; text-align: right; }
+
+  .sign { position: absolute; right: 12mm; bottom: 9mm; text-align: right; }
+  .sign .br { font-family: var(--narrow); font-weight: bold; color: var(--grey); font-size: 12px;
+              text-transform: uppercase; }
+  .sign .nm { font-family: "Snell Roundhand", "Bradley Hand", "Segoe Script", cursive; font-size: 30px;
+              color: var(--ink); line-height: 1; margin-top: 2px; }
+  .notover { position: absolute; right: 12mm; bottom: 92mm; font-family: var(--narrow); font-weight: bold;
+             color: var(--grey-light); text-transform: uppercase; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<div class="page">
+  {% if cv.page_indicator %}<div class="pageno">( <b>1</b> of 3 )</div>{% endif %}
+
+  <div class="head">
+    <div class="name">{{ cv.name.split(' ')|join('<br>')|safe }}</div>
+    <div class="head-right">
+      <img class="photo" src="{{ cv.photo }}" alt="">
+      <div class="badge">
+        <div class="big">{{ cv.badge.big }}</div>
+        <div class="yrs">{{ cv.badge.small }}</div>
+        <div class="tags">{% for t in cv.badge.tags %}<div>{{ t }}</div>{% endfor %}</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="contact">{{ cv.contact.email }} &nbsp;&nbsp; {{ cv.contact.phone }}</div>
+
+  <div class="profile">
+    {% for p in cv.profile %}<p>{{ p }}</p>{% endfor %}
+    <div class="tag-right">{{ cv.tag }}</div>
+  </div>
+
+  <div class="lecturer">{{ cv.lecturer }}</div>
+
+  <div class="h-sec itsme-h">It's me</div>
+  <ul class="bul">
+    {% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}
+  </ul>
+
+  <div class="addh">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
+  {% for a in cv.additional %}
+  <div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>
+  {% endfor %}
+</div>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page">
+  <div class="pageno">( <b>2</b> of 3 )</div>
+  <div class="h-big">Employment history</div>
+  {% for j in cv.experience[:5] %}
+  <div class="job">
+    {% if j.aside %}<div class="aside"><img src="{{ j.aside.logo }}">{{ j.aside.text }}</div>{% endif %}
+    <div class="job-head">
+      {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
+      <span class="job-role">{{ j.role }}</span>
+      <span class="job-dates">{{ j.dates }}</span>
+    </div>
+    <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============ PAGE 3 ============ -->
+<div class="page">
+  <div class="pageno">( <b>3</b> of 3 )</div>
+  <div class="tagline">...earlier</div>
+  <div class="cols2" style="margin-top:6px">
+    <div>
+      {% for j in cv.experience[5:] %}
+      {% if loop.index0 != 1 %}
+      <div class="job">
+        <div class="job-head">
+          {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
+          <span class="job-role">{{ j.role }}</span>
+          <span class="job-dates">{{ j.dates }}</span>
+        </div>
+        <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+      </div>
+      {% endif %}
+      {% endfor %}
+    </div>
+    <div>
+      {% set j = cv.experience[6] %}
+      <div class="job">
+        <div class="job-head">
+          {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
+          <span class="job-role">{{ j.role }}</span>
+          <span class="job-dates">{{ j.dates }}</span>
+        </div>
+        <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+      </div>
+    </div>
+  </div>
+
+  <div class="h-big" style="margin-top:10px">Education</div>
+  <div class="edu">
+    <div class="edu-fields">{% for f in cv.education.fields %}<span>{{ f }}</span>{% endfor %}</div>
+    <div class="edu-school"><img src="{{ cv.education.logo }}"><b>{{ cv.education.school }}</b></div>
+  </div>
+
+  <div class="notover">...and this is not over</div>
+
+  <div class="h-big" style="margin-top:12px">More about me</div>
+  <div class="about">
+    <div class="col"><div class="col-h">about me</div><ul>{% for x in cv.about_me %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div class="col"><div class="col-h">my interests</div><ul>{% for x in cv.interests %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div class="col"><div class="col-h">tech skills</div><ul>{% for x in cv.tech_skills %}<li>{{ x }}</li>{% endfor %}</ul></div>
+    <div class="col"><div class="col-h">favourite quotes</div>
+      {% for q in cv.quotes %}<div class="quote"><div class="q">"{{ q.text }}"</div><div class="a">{{ q.author }}</div></div>{% endfor %}
+    </div>
+  </div>
+
+  <div class="sign"><div class="br">Best regards</div><div class="nm">{{ cv.signature }}</div></div>
+</div>
+
+</body>
+</html>

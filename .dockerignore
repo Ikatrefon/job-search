@@ -1,0 +1,11 @@
+app/.venv/
+app/data/
+.env
+.git/
+**/__pycache__/
+*.pyc
+template/_render.html
+template/cv.pdf
+Michal_Duchowski_CV.pdf
+Zrzut*.png
+specyfikacja_cv_automat.md

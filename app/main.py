@@ -1,0 +1,148 @@
+"""JOB SEARCH — MVP (etap 1): kanał ręczny → ocena → generacja (guardrail) → PDF → poczekalnia."""
+import json, os
+from fastapi import FastAPI, Form, Request
+from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
+from fastapi.templating import Jinja2Templates
+from . import config, db, engine, pdf
+
+app = FastAPI(title="Job Search — CV automat")
+templates = Jinja2Templates(directory=str(config.APP_DIR / "templates"))
+db.init()
+
+def _threshold():
+    return int(db.get_config("threshold", config.DEFAULT_THRESHOLD))
+
+def _evaluate_ad(ad_id, model=None):
+    """Ocena ogłoszenia. model=None → domyślny (Sonnet); model=Opus → ręczna eskalacja."""
+    ad = db.get_ad(ad_id)
+    base = engine.load_base_cv()
+    used = model or engine._eval_model()
+    try:
+        score, verdict, wants, gaps = engine.evaluate(ad, base, model=model)
+        db.update_ad_eval(ad_id, score,
+                          json.dumps({"verdict": verdict, "wants": wants}, ensure_ascii=False),
+                          json.dumps(gaps, ensure_ascii=False), used)
+    except Exception as e:
+        db.update_ad_eval(ad_id, 0, "", json.dumps({"error": f"Błąd oceny: {e}"}, ensure_ascii=False), used)
+
+def _generate_cv(ad_id):
+    """Generacja dopasowanego CV + guardrail + PDF (wolniejsze, na żądanie)."""
+    ad = db.get_ad(ad_id)
+    base = engine.load_base_cv()
+    try:
+        tailored, justification = engine.generate(ad, base, ad.get("summary") or "")
+        tailored, warnings = engine.guardrail(base, tailored)
+        out = config.PDF_DIR / f"{ad_id}.pdf"
+        pdf.render_pdf(tailored, out)
+        db.save_cv(ad_id, tailored, justification, warnings, str(out))
+    except Exception as e:
+        db.save_cv(ad_id, base, f"Błąd generacji: {e}", [], "")
+
+@app.get("/", response_class=HTMLResponse)
+def index(request: Request):
+    return templates.TemplateResponse(request, "index.html", {
+        "ads": db.list_ads(), "threshold": _threshold(), "mock": config.USE_MOCK})
+
+@app.post("/paste")
+def paste(opis: str = Form(...), tytul: str = Form(""), firma: str = Form(""),
+          link: str = Form(""), kraj: str = Form("")):
+    ad_id = db.add_ad({"tytul": tytul, "firma": firma, "opis": opis,
+                       "link": link, "kraj": kraj, "zrodlo": "manual"})
+    _evaluate_ad(ad_id)            # tylko ocena (szybko); CV generuje się na żądanie w detalu
+    return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.get("/ad/{ad_id}", response_class=HTMLResponse)
+def ad_detail(request: Request, ad_id: int):
+    ad = db.get_ad(ad_id)
+    if not ad:
+        return RedirectResponse("/", status_code=303)
+    cv = db.get_cv(ad_id)
+    warnings = json.loads(cv["warnings"]) if cv and cv.get("warnings") else []
+    profile = ""
+    if cv:
+        try: profile = "\n\n".join(json.loads(cv["content_json"]).get("profile", []))
+        except Exception: pass
+    # ocena: format = JSON; obsługa starszych wariantów (lista / tekst) wstecznie
+    verdict = None; wants = None
+    try:
+        v = json.loads(ad.get("summary") or "")
+        if isinstance(v, dict): verdict, wants = v.get("verdict"), v.get("wants", [])
+        elif isinstance(v, list): wants = v
+    except Exception:
+        pass
+    gaps_missing = gaps_tune = gaps_err = None
+    try:
+        g = json.loads(ad.get("gaps") or "")
+        if isinstance(g, dict):
+            gaps_missing, gaps_tune, gaps_err = g.get("missing", []), g.get("tune", []), g.get("error")
+    except Exception:
+        pass
+    em = ad.get("eval_model")
+    return templates.TemplateResponse(request, "detail.html", {
+        "ad": ad, "cv": cv, "warnings": warnings, "profile": profile, "threshold": _threshold(),
+        "verdict": verdict, "wants": wants, "wants_raw": ad.get("summary") or "",
+        "gaps_missing": gaps_missing, "gaps_tune": gaps_tune, "gaps_err": gaps_err,
+        "gaps_raw": ad.get("gaps") or "",
+        "eval_model_label": config.MODEL_LABELS.get(em, em or ""),
+        "is_opus": em == config.OPUS_MODEL})
+
+@app.get("/pdf/{ad_id}")
+def get_pdf(ad_id: int):
+    cv = db.get_cv(ad_id)
+    if not cv or not cv.get("pdf_path"):
+        return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+    return FileResponse(cv["pdf_path"], media_type="application/pdf",
+                        filename=f"CV_dopasowane_{ad_id}.pdf")
+
+@app.post("/ad/{ad_id}/status")
+def set_status(ad_id: int, status: str = Form(...)):
+    db.set_status(ad_id, status)
+    return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.post("/ad/{ad_id}/delete")
+def delete_ad(ad_id: int):
+    cv = db.get_cv(ad_id)
+    if cv and cv.get("pdf_path"):
+        try: os.remove(cv["pdf_path"])
+        except OSError: pass
+    db.delete_ad(ad_id)
+    return RedirectResponse("/", status_code=303)
+
+@app.post("/ad/{ad_id}/deepen")
+def deepen(ad_id: int):
+    _evaluate_ad(ad_id, model=config.OPUS_MODEL)   # ręczna eskalacja do Opus
+    return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.post("/ad/{ad_id}/generate")
+def generate_cv(ad_id: int):
+    _generate_cv(ad_id)
+    return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.post("/ad/{ad_id}/edit")
+def edit_cv(ad_id: int, profile: str = Form(...)):
+    """„Popraw" bez wywołania modelu: edycja podsumowania + ponowny render PDF."""
+    cv = db.get_cv(ad_id)
+    if cv:
+        content = json.loads(cv["content_json"])
+        content["profile"] = [p.strip() for p in profile.split("\n\n") if p.strip()]
+        out = config.PDF_DIR / f"{ad_id}.pdf"
+        pdf.render_pdf(content, out)
+        db.save_cv(ad_id, content, cv["justification"],
+                   json.loads(cv["warnings"]) if cv.get("warnings") else [], str(out), edited=1)
+    return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+
+@app.get("/settings", response_class=HTMLResponse)
+def settings(request: Request):
+    return templates.TemplateResponse(request, "settings.html", {
+        "threshold": _threshold(),
+        "models": config.MODELS,
+        "eval_model": db.get_config("eval_model", config.EVAL_MODEL),
+        "gen_model": db.get_config("gen_model", config.GEN_MODEL),
+        "mock": config.USE_MOCK})
+
+@app.post("/settings")
+def save_settings(threshold: int = Form(...), eval_model: str = Form(...), gen_model: str = Form(...)):
+    db.set_config("threshold", threshold)
+    if eval_model in config.VALID_MODEL_IDS: db.set_config("eval_model", eval_model)
+    if gen_model in config.VALID_MODEL_IDS: db.set_config("gen_model", gen_model)
+    return RedirectResponse("/settings", status_code=303)

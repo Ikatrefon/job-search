@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% block content %}
+
+<h1 class="font-semibold text-slate-900 text-lg mb-4">Ustawienia</h1>
+
+<form method="post" action="/settings" class="space-y-6 max-w-2xl">
+
+  <section class="bg-white rounded-xl shadow-sm p-5">
+    <h2 class="font-semibold text-slate-900 mb-1">Modele Claude</h2>
+    <p class="text-xs text-slate-500 mb-4">Mocniejszy = lepsza jakość, ale wolniej i drożej za wywołanie.</p>
+
+    <label class="block mb-4">
+      <span class="text-sm font-medium text-slate-700">Ocena dopasowania <span class="text-slate-400 font-normal">(przy każdym wklejeniu — warto tani/szybki)</span></span>
+      <select name="eval_model" class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        {% for mid, label in models %}
+        <option value="{{ mid }}" {{ 'selected' if mid==eval_model }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Generacja CV <span class="text-slate-400 font-normal">(na żądanie — warto mocniejszy)</span></span>
+      <select name="gen_model" class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+        {% for mid, label in models %}
+        <option value="{{ mid }}" {{ 'selected' if mid==gen_model }}>{{ label }}</option>
+        {% endfor %}
+      </select>
+    </label>
+  </section>
+
+  <section class="bg-white rounded-xl shadow-sm p-5">
+    <h2 class="font-semibold text-slate-900 mb-1">Próg dopasowania</h2>
+    <p class="text-xs text-slate-500 mb-3">Tylko informacyjnie — sugeruje, czy warto generować CV. Generację i tak uruchamiasz ręcznie.</p>
+    <input type="number" name="threshold" value="{{ threshold }}" min="0" max="100"
+           class="block w-28 border border-slate-300 rounded-lg px-3 py-2 text-sm">
+  </section>
+
+  <div class="flex items-center gap-3">
+    <button class="bg-slate-900 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-slate-700">Zapisz ustawienia</button>
+    <span class="text-xs text-slate-500">{% if mock %}⚠ tryb MOCK (brak klucza API){% else %}✓ połączone z Claude API{% endif %}</span>
+  </div>
+</form>
+{% endblock %}

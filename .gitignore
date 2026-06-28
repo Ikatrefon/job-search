@@ -1,0 +1,12 @@
+.env
+.DS_Store
+**/.DS_Store
+app/.venv/
+app/data/
+__pycache__/
+**/__pycache__/
+template/_render.html
+Zrzut*.png
+template/cv.pdf
+*.pyc
+template/cv.html
