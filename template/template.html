@@ -67,6 +67,13 @@
   .job2-head svg { width: 100%; height: auto; display: block; }
   .job2 ul.bul { font-family: var(--narrow); font-size: 12pt; line-height: 1.18; }
 
+  /* ---------- PAGE 3 — ciaśniej (3 prace + edukacja + 4 kolumny na 1 stronie) ---------- */
+  .job3 { margin-bottom: 9pt; }
+  .job3 .job2-head { margin-bottom: 3pt; }
+  .job3 ul.bul { font-size: 11pt; line-height: 1.16; }
+  .edu-svg { width: 527pt; margin: 7pt 0 4pt; }
+  .edu-svg svg { width: 100%; height: auto; display: block; }
+
   /* ---------- PAGE 2/3 EXPERIENCE (stary układ — str. 3) ---------- */
   .h-big { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
            font-size: 13px; letter-spacing: .05em; margin-bottom: 16pt; color: var(--grey); }
@@ -100,16 +107,16 @@
                   text-transform: uppercase; letter-spacing: .04em; }
 
   /* ---------- MORE ABOUT ME ---------- */
-  .about { display: grid; grid-template-columns: 1fr 1fr 1fr 1.25fr; gap: 0 18px; margin-top: 6px; }
-  .about col, .about .col { }
+  .about { display: grid; grid-template-columns: 1fr 1fr 1fr 1.25fr; gap: 0 16px; margin-top: 6px;
+           font-family: var(--narrow); font-size: 10pt; line-height: 1.18; }
   .col-h { font-family: var(--narrow); font-weight: bold; text-transform: uppercase; color: var(--grey);
-           font-size: 12px; letter-spacing: .04em; margin-bottom: 6px; border-bottom: 1px solid var(--line);
+           font-size: 11pt; letter-spacing: .04em; margin-bottom: 5px; border-bottom: 1px solid var(--line);
            padding-bottom: 3px; }
   .col ul { list-style: none; }
-  .col li { margin-bottom: 3px; }
-  .quote { margin-bottom: 8px; }
+  .col li { margin-bottom: 2.5px; }
+  .quote { margin-bottom: 6px; }
   .quote .q { font-style: italic; }
-  .quote .a { color: var(--grey); font-size: 8px; text-align: right; }
+  .quote .a { color: var(--grey); font-size: 9pt; text-align: right; }
 
   .sign { position: absolute; right: 12mm; bottom: 9mm; text-align: right; }
   .sign .br { font-family: var(--narrow); font-weight: bold; color: var(--grey); font-size: 12px;
@@ -171,39 +178,21 @@
 <div class="page">
   <div class="pageno">( <b>3</b> of 3 )</div>
   <div class="tagline">...earlier</div>
-  <div class="cols2" style="margin-top:6px">
-    <div>
-      {% for j in cv.experience[5:] %}
-      {% if loop.index0 != 1 %}
-      <div class="job">
-        <div class="job-head">
-          {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
-          <span class="job-role">{{ j.role }}</span>
-          <span class="job-dates">{{ j.dates }}</span>
-        </div>
-        <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
-      </div>
-      {% endif %}
-      {% endfor %}
-    </div>
-    <div>
-      {% set j = cv.experience[6] %}
-      <div class="job">
-        <div class="job-head">
-          {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
-          <span class="job-role">{{ j.role }}</span>
-          <span class="job-dates">{{ j.dates }}</span>
-        </div>
-        <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
-      </div>
-    </div>
-  </div>
 
-  <div class="h-big" style="margin-top:10px">Education</div>
-  <div class="edu">
-    <div class="edu-fields">{% for f in cv.education.fields %}<span>{{ f }}</span>{% endfor %}</div>
-    <div class="edu-school"><img src="{{ cv.education.logo }}"><b>{{ cv.education.school }}</b></div>
+  {% for j in cv.experience[5:] %}
+  <div class="job2 job3">
+    {% if j.head_svg %}<div class="job2-head">{{ j.head_svg|safe }}</div>
+    {% else %}
+    <div class="job-head">
+      {% if j.logo %}<img class="job-logo" src="{{ j.logo }}">{% else %}<span class="job-logo text">{{ j.company }}</span>{% endif %}
+      <span class="job-role">{{ j.role }}</span><span class="job-dates">{{ j.dates }}</span>
+    </div>
+    {% endif %}
+    <ul class="bul">{% for b in j.bullets[:3] %}<li>{{ b }}</li>{% endfor %}</ul>
   </div>
+  {% endfor %}
+
+  <div class="edu-svg">{{ edu_svg|safe }}</div>
 
   <div class="notover">...and this is not over</div>
 
