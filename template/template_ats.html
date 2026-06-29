@@ -80,6 +80,10 @@
   .ats-cols { font-family: var(--narrow); font-size: 11pt; line-height: 1.35; margin-top: 22pt; }
   .ats-cols > div { margin-bottom: 5pt; }
   .ats-lbl { font-weight: bold; text-transform: uppercase; color: var(--grey); font-size: 10pt; letter-spacing: .03em; }
+  .ats-quotes { font-family: var(--narrow); font-size: 11pt; line-height: 1.3; margin-top: 22pt; }
+  .ats-quotes .ats-lbl { display: block; margin-bottom: 4pt; }
+  .ats-quotes .aq { font-style: italic; margin-bottom: 2.5pt; }
+  .ats-quotes .aqa { font-style: normal; color: var(--grey); }
 
   /* ---------- PAGE 2 — prace z SVG (głowa) + punkty 12pt ---------- */
   .job2 { margin-bottom: 18pt; }   /* większy odstęp między blokami */
@@ -211,6 +215,11 @@
     <div><span class="ats-lbl">About me:</span> {{ cv.about_me|join(', ') }}</div>
     <div><span class="ats-lbl">Interests:</span> {{ cv.interests|join(', ') }}</div>
     <div><span class="ats-lbl">Tech skills:</span> {{ cv.tech_skills|join(', ') }}</div>
+  </div>
+
+  <div class="ats-quotes">
+    <div class="ats-lbl">Favourite quotes</div>
+    {% for q in cv.quotes %}<div class="aq">"{{ q.text }}" — <span class="aqa">{{ q.author }}</span></div>{% endfor %}
   </div>
 </div>
 
