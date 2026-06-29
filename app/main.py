@@ -40,9 +40,11 @@ def _generate_cv(ad_id):
     try:
         tailored, justification = engine.generate(ad, base, ad.get("summary") or "")
         tailored, warnings = engine.guardrail(base, tailored)
-        out = config.PDF_DIR / f"{ad_id}.pdf"
-        pdf.render_pdf(tailored, out)
-        db.save_cv(ad_id, tailored, justification, warnings, str(out))
+        out_ats = config.PDF_DIR / f"{ad_id}.pdf"            # ATS = domyślny plik
+        out_gfx = config.PDF_DIR / f"{ad_id}_graphic.pdf"    # wersja graficzna (na żądanie)
+        pdf.render_pdf(tailored, out_ats, template=config.TEMPLATE_ATS)
+        pdf.render_pdf(tailored, out_gfx)
+        db.save_cv(ad_id, tailored, justification, warnings, str(out_ats))
     except Exception as e:
         db.save_cv(ad_id, base, f"Błąd generacji: {e}", [], "")
 
@@ -96,11 +98,21 @@ def ad_detail(request: Request, ad_id: int):
 
 @app.get("/pdf/{ad_id}")
 def get_pdf(ad_id: int):
+    """Domyślnie wersja ATS (= cv.pdf_path)."""
     cv = db.get_cv(ad_id)
     if not cv or not cv.get("pdf_path"):
         return RedirectResponse(f"/ad/{ad_id}", status_code=303)
     # inline → iframe wyświetla podgląd zamiast pobierać; pobieranie wymusza atrybut download na linku
     return FileResponse(cv["pdf_path"], media_type="application/pdf",
+                        headers={"Content-Disposition": "inline"})
+
+@app.get("/pdf/{ad_id}/graphic")
+def get_pdf_graphic(ad_id: int):
+    """Wersja graficzna (na bezpośredni kontakt z człowiekiem)."""
+    path = config.PDF_DIR / f"{ad_id}_graphic.pdf"
+    if not path.exists():
+        return RedirectResponse(f"/ad/{ad_id}", status_code=303)
+    return FileResponse(str(path), media_type="application/pdf",
                         headers={"Content-Disposition": "inline"})
 
 @app.post("/ad/{ad_id}/meta")
@@ -121,6 +133,8 @@ def delete_ad(ad_id: int):
     if cv and cv.get("pdf_path"):
         try: os.remove(cv["pdf_path"])
         except OSError: pass
+    try: os.remove(config.PDF_DIR / f"{ad_id}_graphic.pdf")
+    except OSError: pass
     db.delete_ad(ad_id)
     return RedirectResponse("/", status_code=303)
 
@@ -141,10 +155,12 @@ def edit_cv(ad_id: int, profile: str = Form(...)):
     if cv:
         content = json.loads(cv["content_json"])
         content["profile"] = [p.strip() for p in profile.split("\n\n") if p.strip()]
-        out = config.PDF_DIR / f"{ad_id}.pdf"
-        pdf.render_pdf(content, out)
+        out_ats = config.PDF_DIR / f"{ad_id}.pdf"
+        out_gfx = config.PDF_DIR / f"{ad_id}_graphic.pdf"
+        pdf.render_pdf(content, out_ats, template=config.TEMPLATE_ATS)
+        pdf.render_pdf(content, out_gfx)
         db.save_cv(ad_id, content, cv["justification"],
-                   json.loads(cv["warnings"]) if cv.get("warnings") else [], str(out), edited=1)
+                   json.loads(cv["warnings"]) if cv.get("warnings") else [], str(out_ats), edited=1)
     return RedirectResponse(f"/ad/{ad_id}", status_code=303)
 
 @app.get("/settings", response_class=HTMLResponse)

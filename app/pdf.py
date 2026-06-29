@@ -1,5 +1,6 @@
 """Render dopasowanego CV (dict, schemat jak cv.json) → PDF przez szablon + Chromium."""
 import json, re
+from pathlib import Path
 from jinja2 import Template
 from playwright.sync_api import sync_playwright
 from . import config
@@ -96,14 +97,17 @@ def _inject_head_svgs(cv_dict):
             if svg:
                 e["head_svg"] = svg
 
-def render_pdf(cv_dict, out_path):
-    tpl = Template(config.TEMPLATE_HTML.read_text(encoding="utf-8"))
+def render_pdf(cv_dict, out_path, template=None):
+    """Render CV → PDF. template=None → wersja graficzna; config.TEMPLATE_ATS → wersja ATS.
+    Oba warianty dostają top_svg/edu_svg/head_svg — szablon używa tego, czego potrzebuje."""
+    template = template or config.TEMPLATE_HTML
+    tpl = Template(template.read_text(encoding="utf-8"))
     top_svg = _load_svg("top.svg")
     edu_svg = _load_svg("edu.svg")
     _inject_head_svgs(cv_dict)
     html = tpl.render(cv=cv_dict, top_svg=top_svg, edu_svg=edu_svg)
-    # zapis w katalogu szablonu, żeby względne assets/ się rozwiązały
-    tmp = config.TEMPLATE_DIR / "_render.html"
+    # zapis w katalogu szablonu, żeby względne assets/ się rozwiązały; nazwa unikalna per plik wyjściowy
+    tmp = config.TEMPLATE_DIR / f"_render_{Path(out_path).stem}.html"
     tmp.write_text(html, encoding="utf-8")
     with sync_playwright() as p:
         b = p.chromium.launch()

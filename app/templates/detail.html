@@ -103,8 +103,12 @@
       <div class="bg-white rounded-xl shadow-sm p-5">
         <div class="flex items-center justify-between mb-2">
           <h2 class="font-semibold text-slate-900">Dopasowane CV {% if cv.edited %}<span class="text-xs text-indigo-600">(edytowane)</span>{% endif %}</h2>
-          <a href="/pdf/{{ ad.id }}" download="CV_{{ ad.id }}.pdf" class="text-sm bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700">Pobierz PDF</a>
+          <div class="flex items-center gap-2">
+            <a href="/pdf/{{ ad.id }}" download="CV_{{ ad.id }}_ATS.pdf" class="text-sm bg-slate-900 text-white px-3 py-1.5 rounded-lg hover:bg-slate-700">Pobierz CV (ATS)</a>
+            <a href="/pdf/{{ ad.id }}/graphic" download="CV_{{ ad.id }}_graficzne.pdf" class="text-sm border border-slate-300 text-slate-600 px-3 py-1.5 rounded-lg hover:bg-slate-50">Wersja graficzna</a>
+          </div>
         </div>
+        <p class="text-xs text-slate-400 mb-2">Domyślnie pobierasz <b>wersję ATS</b> (jedna kolumna, czysty tekst — pod systemy rekrutacyjne). „Wersja graficzna" = na bezpośredni kontakt z człowiekiem.</p>
         {% if cv.justification %}<p class="text-sm text-slate-600 italic mb-3">{{ cv.justification }}</p>{% endif %}
         {% if warnings %}
         <div class="bg-amber-50 border border-amber-200 rounded-lg p-3 mb-3">

@@ -14,7 +14,8 @@ if _env.exists():
             os.environ.setdefault(k.strip(), v.strip())
 APP_DIR = BASE_DIR / "app"
 TEMPLATE_DIR = BASE_DIR / "template"                        # szablon CV (HTML/CSS + assets)
-TEMPLATE_HTML = TEMPLATE_DIR / "template.html"
+TEMPLATE_HTML = TEMPLATE_DIR / "template.html"             # wersja graficzna (dla człowieka)
+TEMPLATE_ATS = TEMPLATE_DIR / "template_ats.html"          # wersja ATS (czysty tekst, domyślna)
 CV_BASE_JSON = TEMPLATE_DIR / "cv.json"                     # bazowe CV = źródło prawdy
 
 DATA_DIR = APP_DIR / "data"
