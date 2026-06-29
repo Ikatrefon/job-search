@@ -96,7 +96,14 @@
   "education": {
     "school": "SWPS UNIVERSITY",
     "logo": "assets/swps.png",
-    "fields": ["MBA IT", "UX DESIGN", "INDUSTRIAL DESIGN", "INTERNET MARKETING", "BUSINESS STUDIES"]
+    "fields": ["MBA IT", "UX DESIGN", "INDUSTRIAL DESIGN", "INTERNET MARKETING", "BUSINESS STUDIES"],
+    "detail": [
+      { "field": "MBA IT", "school": "PJATK (Polish-Japanese Academy of IT)" },
+      { "field": "UX Design", "school": "SWPS University" },
+      { "field": "Industrial Design", "school": "ASP Warsaw (Academy of Fine Arts)" },
+      { "field": "Internet Marketing", "school": "Kozminski University" },
+      { "field": "Business Studies", "school": "Kozminski University" }
+    ]
   },
   "about_me": ["Curious", "Open", "Collaborative", "Proactive", "Positive", "Flexible", "Thinker & Doer", "Communicative", "Pragmatic", "Empathic", "Analytic", "but synthetic as well", "I learn quickly", "Fan of humankind", "Trainer"],
   "interests": ["Users - people", "Users - Experience", "Neuro Science", "AI", "Science (general)", "Design", "Communication", "Technology", "Books", "Knowledge", "Journeys", "No any sports, I'm a walker (20k steps per day)"],

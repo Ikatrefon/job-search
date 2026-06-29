@@ -1,0 +1,218 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<style>
+  @page { size: A4; margin: 0; }
+  @font-face { font-family: "ArialN"; font-weight: 400; font-style: normal;
+               src: url("fonts/ArialNarrow.ttf") format("truetype"); }
+  @font-face { font-family: "ArialN"; font-weight: 700; font-style: normal;
+               src: url("fonts/ArialNarrow-Bold.ttf") format("truetype"); }
+  @font-face { font-family: "Antonio"; font-weight: 100 700; font-style: normal;
+               src: url("fonts/Antonio.ttf") format("truetype"); }
+  /* alias pod nazwę używaną w SVG-ach z Figmy */
+  @font-face { font-family: "Arial Narrow"; font-weight: 400; font-style: normal;
+               src: url("fonts/ArialNarrow.ttf") format("truetype"); }
+  @font-face { font-family: "Arial Narrow"; font-weight: 700; font-style: normal;
+               src: url("fonts/ArialNarrow-Bold.ttf") format("truetype"); }
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  :root {
+    --ink: #161616;
+    --grey: #8c8c8c;
+    --grey-light: #b9b9b9;
+    --line: #d8d8d8;
+    --narrow: "ArialN", "Arial Narrow", Arial, sans-serif;
+    --body: Arial, "Liberation Sans", Helvetica, sans-serif;
+  }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: var(--body); color: var(--ink); font-size: 9.2px; line-height: 1.35; }
+
+  .page {
+    position: relative;
+    width: 210mm; height: 297mm;
+    padding: 13mm 12mm 10mm;
+    overflow: hidden;
+    background: #fff;
+  }
+  .page + .page { page-break-before: always; }
+
+  .pageno { position: absolute; top: 11mm; right: 12mm; font-family: var(--narrow); font-weight: bold;
+            font-size: 19px; color: var(--grey-light); letter-spacing: .02em; }
+  .pageno b { color: var(--grey); }
+
+  /* ---------- PAGE 1 HEADER (pozycje w pt = 1:1 z oryginałem PDF) ---------- */
+  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; }  /* szer. = kolumna tekstu (marginesy 12mm); SVG inline = tekst zaznaczalny (ATS) */
+  .p1-top svg { width: 100%; height: auto; display: block; }
+  .p1-body { margin-top: 188pt; }   /* zejście poniżej nagłówka SVG */
+
+  /* ---------- PAGE 1 — BLOKI TEKSTU ---------- */
+  /* górny blok: Arial Narrow 14pt, 3 sekcje (profil ×2 + lecturer) */
+  .blk-top { font-family: var(--narrow); font-size: 14pt; line-height: 1.2; color: var(--ink); }
+  .blk-top p { margin: 0 0 9pt; }
+  /* dolny blok: Arial Narrow 12pt, 2 sekcje (It's me + additional) */
+  .blk-bot { font-family: var(--narrow); font-size: 12pt; line-height: 1.2; margin-top: 12pt; }
+  .blk-bot section { margin-bottom: 10pt; }
+  .sec-h { font-family: var(--narrow); font-weight: bold; font-size: 12pt; margin-bottom: 4pt; }
+
+  /* ATS: punktor inline (nie absolutny!) — inaczej lista maluje się w osobnej warstwie
+     i w warstwie tekstowej PDF punkty odrywają się od nagłówków (zła kolejność dla ATS) */
+  ul.bul { list-style: none; }
+  ul.bul li { position: static; padding-left: 11pt; text-indent: -11pt; margin-bottom: 1.5pt; }
+  ul.bul li::before { content: "•  "; color: var(--ink); }
+
+  .add-item { margin-bottom: 4pt; }
+  .add-item b { font-weight: bold; }
+
+  /* ---------- WERSJA ATS — czysty tekst, jedna kolumna ---------- */
+  .ats-job { margin-bottom: 13pt; }
+  .ats-job.job3 { margin-bottom: 10pt; }
+  .ats-co { font-family: var(--narrow); font-weight: bold; font-size: 15pt; text-transform: uppercase;
+            letter-spacing: .01em; color: var(--ink); line-height: 1.05; }
+  .ats-meta { font-family: var(--narrow); font-size: 12pt; margin: 1pt 0 3pt; }
+  .ats-role { font-weight: bold; }
+  .ats-dates { color: var(--grey); }
+  .ats-dates::before { content: "  ·  "; color: var(--grey-light); }
+  .ats-job ul.bul { font-family: var(--narrow); font-size: 12pt; line-height: 1.18; }
+  .ats-job.job3 ul.bul { font-size: 11pt; line-height: 1.16; }
+  .ats-edu { list-style: none; font-family: var(--narrow); font-size: 12pt; line-height: 1.3; margin-top: 3pt; }
+  .ats-edu li { margin-bottom: 2pt; }
+  .ats-edu b { font-weight: bold; }
+  .ats-cols { font-family: var(--narrow); font-size: 11pt; line-height: 1.35; margin-top: 14pt; }
+  .ats-cols > div { margin-bottom: 5pt; }
+  .ats-lbl { font-weight: bold; text-transform: uppercase; color: var(--grey); font-size: 10pt; letter-spacing: .03em; }
+
+  /* ---------- PAGE 2 — prace z SVG (głowa) + punkty 12pt ---------- */
+  .job2 { margin-bottom: 18pt; }   /* większy odstęp między blokami */
+  .job2-head { width: 527pt; margin-bottom: 5pt; overflow: hidden; }   /* SVG skalowany do kolumny: logo lewo, daty prawo wyrównane; clip ewentualny bleed */
+  .job2-head svg { width: 100%; height: auto; display: block; }
+  .job2 ul.bul { font-family: var(--narrow); font-size: 12pt; line-height: 1.18; }
+
+  /* ---------- PAGE 3 — ciaśniej (3 prace + edukacja + 4 kolumny na 1 stronie) ---------- */
+  .job3 { margin-bottom: 9pt; }
+  .job3 .job2-head { margin-bottom: 3pt; }
+  .job3 ul.bul { font-size: 11pt; line-height: 1.16; }
+  .edu-h { margin: 17pt 0 3pt; }   /* nagłówek EDUCATION w stylu „…EARLIER" (lewa strona); odstęp od pracy GREY */
+  .edu-svg { width: 527pt; margin: 0 0 6pt; }
+  .edu-svg svg { width: 100%; height: auto; display: block; }
+
+  /* ---------- PAGE 2/3 EXPERIENCE (stary układ — str. 3) ---------- */
+  .h-big { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
+           font-size: 13px; letter-spacing: .05em; margin-bottom: 16pt; color: var(--grey); }
+  .tagline { font-family: var(--narrow); font-weight: bold; color: var(--grey-light);
+             text-transform: uppercase; font-size: 14px; }
+
+  .job { margin-bottom: 13px; }
+  .job-head { display: flex; align-items: center; gap: 12px; border-bottom: 1px solid var(--line);
+              padding-bottom: 5px; margin-bottom: 5px; position: relative; }
+  .job-logo { height: 40px; width: auto; max-width: 150px; object-fit: contain; }
+  .job-logo.text { font-family: var(--narrow); font-weight: bold; font-size: 30px; color: var(--ink); }
+  .job-role { font-family: var(--narrow); font-weight: bold; font-size: 15px; text-transform: uppercase;
+              letter-spacing: .02em; }
+  .job-dates { margin-left: auto; font-family: var(--narrow); font-weight: bold; color: var(--grey);
+               font-size: 13px; white-space: nowrap; }
+  .job .aside { float: right; width: 120px; text-align: center; margin: 0 0 6px 10px; color: var(--grey);
+                font-style: italic; font-size: 8.5px; }
+  .job .aside img { display: block; width: 54px; margin: 0 auto 3px; }
+
+  /* page 3 earlier jobs — two columns */
+  .cols2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0 22px; }
+
+  /* ---------- EDUCATION ---------- */
+  .edu { margin-top: 6px; }
+  .edu-fields { display: flex; flex-wrap: nowrap; align-items: baseline; gap: 0 14px; }
+  .edu-fields span { font-family: var(--narrow); font-weight: bold; text-transform: uppercase;
+                     font-size: 18px; line-height: 1; color: var(--ink); white-space: nowrap; }
+  .edu-school { display: flex; align-items: center; gap: 8px; margin-top: 8px; }
+  .edu-school img { height: 34px; }
+  .edu-school b { font-family: var(--narrow); font-weight: bold; font-size: 13px; color: var(--grey);
+                  text-transform: uppercase; letter-spacing: .04em; }
+
+  /* ---------- MORE ABOUT ME ---------- */
+  .about { display: grid; grid-template-columns: 1fr 1fr 1fr 1.25fr; gap: 0 16px; margin-top: 6px;
+           font-family: var(--narrow); font-size: 10pt; line-height: 1.18; }
+  .col-h { font-family: var(--narrow); font-weight: bold; text-transform: uppercase; color: var(--grey);
+           font-size: 11pt; letter-spacing: .04em; margin-bottom: 5px; border-bottom: 1px solid var(--line);
+           padding-bottom: 3px; }
+  .col ul { list-style: none; }
+  .col li { margin-bottom: 2.5px; }
+  .quote { margin-bottom: 6px; }
+  .quote .q { font-style: italic; }
+  .quote .a { color: var(--grey); font-size: 9pt; text-align: right; }
+
+  .sign { position: absolute; right: 12mm; bottom: 9mm; text-align: right; }
+  .sign .br { font-family: var(--narrow); font-weight: bold; color: var(--grey); font-size: 12px;
+              text-transform: uppercase; }
+  .sign .nm { font-family: "Snell Roundhand", "Bradley Hand", "Segoe Script", cursive; font-size: 30px;
+              color: var(--ink); line-height: 1; margin-top: 2px; }
+  .notover { position: absolute; right: 12mm; bottom: 92mm; font-family: var(--narrow); font-weight: bold;
+             color: var(--grey-light); text-transform: uppercase; font-size: 13px; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<div class="page">
+  <!-- nagłówek: SVG od użytkownika wstawiony INLINE (tekst zaznaczalny, font Antonio przez @font-face) -->
+  <div class="p1-top">{{ top_svg|safe }}</div>
+
+  <div class="p1-body">
+    <!-- GÓRNY BLOK: Arial Narrow 14pt, 3 sekcje -->
+    <div class="blk-top">
+      {% for p in cv.profile %}<p>{{ p }}</p>{% endfor %}
+      <p>{{ cv.lecturer }}</p>
+    </div>
+
+    <!-- DOLNY BLOK: Arial Narrow 12pt, 2 sekcje -->
+    <div class="blk-bot">
+      <section>
+        <div class="sec-h">It's me</div>
+        <ul class="bul">{% for b in cv.itsme %}<li>{{ b }}</li>{% endfor %}</ul>
+      </section>
+      <section>
+        <div class="sec-h">An additional fields of experience (very useful when it comes to the UX/UI design scope)</div>
+        {% for a in cv.additional %}<div class="add-item"><b>{{ a.label }}</b> - {{ a.text }}</div>{% endfor %}
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ============ PAGE 2 ============ -->
+<div class="page">
+  <div class="pageno">( <b>2</b> of 3 )</div>
+  <div class="h-big">Employment history</div>
+  {% for j in cv.experience[:5] %}
+  <div class="ats-job">
+    <div class="ats-co">{{ j.company }}</div>
+    <div class="ats-meta"><span class="ats-role">{{ j.role }}</span><span class="ats-dates">{{ j.dates }}</span></div>
+    <ul class="bul">{% for b in j.bullets %}<li>{{ b }}</li>{% endfor %}</ul>
+  </div>
+  {% endfor %}
+</div>
+
+<!-- ============ PAGE 3 ============ -->
+<div class="page">
+  <div class="pageno">( <b>3</b> of 3 )</div>
+  <div class="tagline">...earlier</div>
+
+  {% for j in cv.experience[5:] %}
+  <div class="ats-job job3">
+    <div class="ats-co">{{ j.company }}</div>
+    <div class="ats-meta"><span class="ats-role">{{ j.role }}</span><span class="ats-dates">{{ j.dates }}</span></div>
+    <ul class="bul">{% for b in j.bullets[:3] %}<li>{{ b }}</li>{% endfor %}</ul>
+  </div>
+  {% endfor %}
+
+  <div class="tagline edu-h">EDUCATION</div>
+  <ul class="ats-edu">
+    {% for e in cv.education.detail %}<li><b>{{ e.field }}</b> — {{ e.school }}</li>{% endfor %}
+  </ul>
+
+  <div class="ats-cols">
+    <div><span class="ats-lbl">About me:</span> {{ cv.about_me|join(', ') }}</div>
+    <div><span class="ats-lbl">Interests:</span> {{ cv.interests|join(', ') }}</div>
+    <div><span class="ats-lbl">Tech skills:</span> {{ cv.tech_skills|join(', ') }}</div>
+  </div>
+</div>
+
+</body>
+</html>
