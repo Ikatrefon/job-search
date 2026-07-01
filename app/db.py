@@ -65,6 +65,11 @@ def add_ad(d):
     c.execute("UPDATE ogloszenia SET ord=? WHERE id=?", (-rid, rid))   # nowe na górze
     c.commit(); c.close(); return rid
 
+def ad_exists_by_link(link):
+    if not link: return False
+    c = conn(); r = c.execute("SELECT 1 FROM ogloszenia WHERE link=? LIMIT 1", (link,)).fetchone(); c.close()
+    return bool(r)
+
 def reorder(ids):
     """Zapisuje ręczną kolejność: ids w kolejności od góry listy."""
     c = conn()

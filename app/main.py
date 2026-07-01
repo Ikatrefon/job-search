@@ -1,9 +1,11 @@
 """JOB SEARCH — MVP (etap 1): kanał ręczny → ocena → generacja (guardrail) → PDF → poczekalnia."""
 import json, os, re
-from fastapi import FastAPI, Form, Request, UploadFile, File
+from fastapi import FastAPI, Form, Request, UploadFile, File, BackgroundTasks
 from fastapi.responses import HTMLResponse, RedirectResponse, FileResponse
 from fastapi.templating import Jinja2Templates
-from . import config, db, engine, pdf
+from . import config, db, engine, pdf, sources
+
+HAIKU_MODEL = "claude-haiku-4-5-20251001"   # tani model do masowej oceny zaciąganych ofert
 
 def _extract_text(path):
     if str(path).lower().endswith(".pdf"):
@@ -61,9 +63,40 @@ def _generate_cv(ad_id):
         db.save_cv(ad_id, base, f"Błąd generacji: {e}", [], "")
 
 @app.get("/", response_class=HTMLResponse)
-def index(request: Request):
+def index(request: Request, fetched: int = -1):
     return templates.TemplateResponse(request, "index.html", {
-        "ads": db.list_ads(), "threshold": _threshold(), "mock": config.USE_MOCK})
+        "ads": db.list_ads(), "threshold": _threshold(), "mock": config.USE_MOCK,
+        "fetched": fetched, "src_keywords": db.get_config("src_keywords", "")})
+
+@app.post("/sources/fetch")
+def sources_fetch(background: BackgroundTasks):
+    """Zaciąga oferty z otwartych źródeł (Arbeitnow; Adzuna gdy skonfigurowane),
+    deduplikuje po linku, dodaje do poczekalni i ocenia w tle tanim modelem (Haiku)."""
+    keywords = [k.strip() for k in db.get_config("src_keywords", "").split(",") if k.strip()]
+    limit = int(db.get_config("src_limit", "20"))
+    autoeval = db.get_config("src_autoeval", "1") == "1"
+    jobs = []
+    try:
+        jobs += sources.fetch_arbeitnow(keywords, limit)
+    except Exception:
+        pass
+    aid_ = db.get_config("adzuna_id", ""); akey = db.get_config("adzuna_key", "")
+    if aid_ and akey and keywords:
+        try:
+            jobs += sources.fetch_adzuna(aid_, akey, " ".join(keywords),
+                                         db.get_config("adzuna_where", ""),
+                                         db.get_config("adzuna_country", "pl"), limit)
+        except Exception:
+            pass
+    new_ids = []
+    for j in jobs:
+        if not j.get("link") or db.ad_exists_by_link(j["link"]):
+            continue
+        new_ids.append(db.add_ad(j))
+    if autoeval:
+        for ad_id in new_ids:
+            background.add_task(_evaluate_ad, ad_id, HAIKU_MODEL)
+    return RedirectResponse(f"/?fetched={len(new_ids)}", status_code=303)
 
 @app.post("/paste")
 def paste(opis: str = Form(...), tytul: str = Form(""), firma: str = Form(""),
@@ -188,7 +221,27 @@ def settings(request: Request):
         "gen_model": db.get_config("gen_model", config.GEN_MODEL),
         "mock": config.USE_MOCK,
         "base_cv_name": base.get("name", "Bazowe CV"),
-        "docs": db.list_docs()})
+        "docs": db.list_docs(),
+        "src_keywords": db.get_config("src_keywords", ""),
+        "src_limit": db.get_config("src_limit", "20"),
+        "src_autoeval": db.get_config("src_autoeval", "1") == "1",
+        "adzuna_id": db.get_config("adzuna_id", ""),
+        "adzuna_key": db.get_config("adzuna_key", ""),
+        "adzuna_country": db.get_config("adzuna_country", "pl"),
+        "adzuna_where": db.get_config("adzuna_where", "")})
+
+@app.post("/settings/sources")
+def save_sources(src_keywords: str = Form(""), src_limit: int = Form(20),
+                 src_autoeval: str = Form(""), adzuna_id: str = Form(""), adzuna_key: str = Form(""),
+                 adzuna_country: str = Form("pl"), adzuna_where: str = Form("")):
+    db.set_config("src_keywords", src_keywords.strip())
+    db.set_config("src_limit", max(1, min(50, int(src_limit))))
+    db.set_config("src_autoeval", "1" if src_autoeval else "0")
+    db.set_config("adzuna_id", adzuna_id.strip())
+    db.set_config("adzuna_key", adzuna_key.strip())
+    db.set_config("adzuna_country", adzuna_country.strip() or "pl")
+    db.set_config("adzuna_where", adzuna_where.strip())
+    return RedirectResponse("/settings", status_code=303)
 
 @app.post("/docs/upload")
 async def upload_doc(file: UploadFile = File(...)):

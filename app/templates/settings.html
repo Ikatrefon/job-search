@@ -75,4 +75,43 @@
     <button class="bg-slate-900 text-white rounded-lg px-4 py-2 text-sm font-medium hover:bg-slate-700">Dodaj dokument</button>
   </form>
 </section>
+
+<!-- Źródła ofert (automatyczne zaciąganie) -->
+<form method="post" action="/settings/sources" class="bg-white rounded-xl shadow-sm p-5 max-w-2xl mt-6 space-y-4">
+  <div>
+    <h2 class="font-semibold text-slate-900 mb-1">Źródła ofert</h2>
+    <p class="text-xs text-slate-500">Przycisk „Pobierz oferty" w poczekalni zaciąga oferty z otwartych źródeł, deduplikuje i (opcjonalnie) ocenia tanim modelem (Haiku). Aktywne: <b>Arbeitnow</b> (bez klucza, gł. DE/UE). Adzuna po podaniu kluczy.</p>
+  </div>
+
+  <label class="block">
+    <span class="text-sm font-medium text-slate-700">Słowa kluczowe <span class="text-slate-400 font-normal">(po przecinku — oferta musi zawierać którekolwiek)</span></span>
+    <input name="src_keywords" value="{{ src_keywords }}" placeholder="np. Head of UX, Design Director, UX Lead"
+           class="mt-1 block w-full border border-slate-300 rounded-lg px-3 py-2 text-sm">
+  </label>
+
+  <div class="flex items-center gap-4 flex-wrap">
+    <label class="block">
+      <span class="text-sm font-medium text-slate-700">Limit na pobranie</span>
+      <input type="number" name="src_limit" value="{{ src_limit }}" min="1" max="50"
+             class="mt-1 block w-24 border border-slate-300 rounded-lg px-3 py-2 text-sm">
+    </label>
+    <label class="flex items-center gap-2 mt-5 text-sm text-slate-700">
+      <input type="checkbox" name="src_autoeval" value="1" {{ 'checked' if src_autoeval }}>
+      Auto-ocena Haiku po pobraniu
+    </label>
+  </div>
+
+  <details class="border-t border-slate-100 pt-3">
+    <summary class="text-sm font-medium text-slate-600 cursor-pointer">Adzuna (opcjonalnie — lepsze wyszukiwanie + UE)</summary>
+    <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 mt-3">
+      <input name="adzuna_id" value="{{ adzuna_id }}" placeholder="app_id" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="adzuna_key" value="{{ adzuna_key }}" placeholder="app_key" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="adzuna_country" value="{{ adzuna_country }}" placeholder="kraj (pl, de, gb…)" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+      <input name="adzuna_where" value="{{ adzuna_where }}" placeholder="lokalizacja (opcjonalnie)" class="border border-slate-300 rounded-lg px-3 py-2 text-sm">
+    </div>
+    <p class="text-xs text-slate-400 mt-2">Darmowe klucze: developer.adzuna.com. Adzuna użyje słów kluczowych powyżej jako zapytania.</p>
+  </details>
+
+  <button class="bg-slate-900 text-white rounded-lg px-5 py-2 text-sm font-medium hover:bg-slate-700">Zapisz źródła</button>
+</form>
 {% endblock %}
