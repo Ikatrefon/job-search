@@ -69,7 +69,10 @@ EVAL_SYS = (
     '"verdict": "2-4 zdania szczerej oceny: czy to realne dopasowanie, dla kogo, główne ryzyko/przewaga (seniority, branża)", '
     '"wants": ["3-6 najważniejszych, KONKRETNYCH rzeczy których pracodawca naprawdę szuka (priorytety)"], '
     '"gaps_missing": ["czego w CV brakuje CAŁKOWICIE względem ogłoszenia — z krótkim czemu to ważne (lub [])"], '
-    '"gaps_tune": ["co JEST w CV ale warto wyeksponować/przeformułować pod to ogłoszenie — konkretnie (lub [])"]}'
+    '"gaps_tune": ["co JEST w CV ale warto wyeksponować/przeformułować pod to ogłoszenie — konkretnie (lub [])"]}\n'
+    "WYMÓG: pole \"wants\" MUSI mieć 3-6 pozycji (każde ogłoszenie ma wymagania — wypisz je). "
+    "NIE umieszczaj wymagań ani luk wyłącznie w \"verdict\" — wypełnij osobno tablice \"wants\"/\"gaps_missing\"/\"gaps_tune\". "
+    "Puste [] jest dozwolone TYLKO dla gaps_missing/gaps_tune, nigdy dla wants."
 )
 
 def evaluate(ad, base_cv, model=None):

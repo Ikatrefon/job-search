@@ -25,8 +25,20 @@ def _evaluate_ad(ad_id, model=None):
     ad = db.get_ad(ad_id)
     base = engine.load_base_cv()
     used = model or engine._eval_model()
+    # poprzednie wants/gaps — żeby pogłębiona ocena ich NIE wyczyściła, gdy model je pominie
+    prev_wants = []; prev_gaps = {}
+    try:
+        pv = json.loads(ad.get("summary") or "")
+        if isinstance(pv, dict): prev_wants = pv.get("wants") or []
+        pg = json.loads(ad.get("gaps") or "")
+        if isinstance(pg, dict): prev_gaps = {"missing": pg.get("missing") or [], "tune": pg.get("tune") or []}
+    except Exception:
+        pass
     try:
         score, verdict, wants, gaps = engine.evaluate(ad, base, model=model)
+        if not wants and prev_wants: wants = prev_wants
+        if not (gaps.get("missing") or gaps.get("tune")) and (prev_gaps.get("missing") or prev_gaps.get("tune")):
+            gaps = prev_gaps
         db.update_ad_eval(ad_id, score,
                           json.dumps({"verdict": verdict, "wants": wants}, ensure_ascii=False),
                           json.dumps(gaps, ensure_ascii=False), used)
@@ -72,27 +84,30 @@ def ad_detail(request: Request, ad_id: int):
     if cv:
         try: profile = "\n\n".join(json.loads(cv["content_json"]).get("profile", []))
         except Exception: pass
-    # ocena: format = JSON; obsługa starszych wariantów (lista / tekst) wstecznie
-    verdict = None; wants = None
+    # ocena: format = JSON; obsługa starszych wariantów (lista / tekst) wstecznie.
+    # wants_raw/gaps_raw pokazujemy TYLKO dla starych wpisów tekstowych — nigdy surowego JSON-a.
+    verdict = None; wants = None; wants_raw = ""
     try:
         v = json.loads(ad.get("summary") or "")
         if isinstance(v, dict): verdict, wants = v.get("verdict"), v.get("wants", [])
         elif isinstance(v, list): wants = v
+        else: wants_raw = str(v)
     except Exception:
-        pass
-    gaps_missing = gaps_tune = gaps_err = None
+        wants_raw = ad.get("summary") or ""
+    gaps_missing = gaps_tune = gaps_err = None; gaps_raw = ""
     try:
         g = json.loads(ad.get("gaps") or "")
         if isinstance(g, dict):
             gaps_missing, gaps_tune, gaps_err = g.get("missing", []), g.get("tune", []), g.get("error")
+        else: gaps_raw = str(g)
     except Exception:
-        pass
+        gaps_raw = ad.get("gaps") or ""
     em = ad.get("eval_model")
     return templates.TemplateResponse(request, "detail.html", {
         "ad": ad, "cv": cv, "warnings": warnings, "profile": profile, "threshold": _threshold(),
-        "verdict": verdict, "wants": wants, "wants_raw": ad.get("summary") or "",
+        "verdict": verdict, "wants": wants, "wants_raw": wants_raw,
         "gaps_missing": gaps_missing, "gaps_tune": gaps_tune, "gaps_err": gaps_err,
-        "gaps_raw": ad.get("gaps") or "",
+        "gaps_raw": gaps_raw,
         "eval_model_label": config.MODEL_LABELS.get(em, em or ""),
         "is_opus": em == config.OPUS_MODEL})
 
