@@ -41,9 +41,15 @@
   .pageno b { color: var(--grey); }
 
   /* ---------- PAGE 1 HEADER (pozycje w pt = 1:1 z oryginałem PDF) ---------- */
-  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; }  /* szer. = kolumna tekstu (marginesy 12mm); SVG inline = tekst zaznaczalny (ATS) */
-  .p1-top svg { width: 100%; height: auto; display: block; }
-  .p1-body { margin-top: 188pt; }   /* zejście poniżej nagłówka SVG */
+  .p1-top { position: absolute; left: 34pt; top: 24pt; width: 527pt; }  /* szer. = kolumna tekstu (marginesy 12mm) */
+  .p1-top > svg { width: 100%; height: auto; display: block; }
+  /* ATS: nazwisko + kontakt jako TEKST (badge/łuk/zdjęcie zostają w SVG) — czysty, wczesny tekst dla ATS */
+  .ah-n1, .ah-n2 { position: absolute; left: 0; font-family: "Antonio","Arial Narrow",sans-serif; font-weight: 700;
+                   text-transform: uppercase; color: #000; line-height: 1; white-space: nowrap; }
+  .ah-n1 { top: 6pt; font-size: 65pt; letter-spacing: -0.04em; }
+  .ah-n2 { top: 82pt; font-size: 73.6pt; letter-spacing: -0.06em; }
+  .ah-contact { position: absolute; left: 5pt; top: 158pt; font-family: Arial, sans-serif; font-size: 11.7pt; color: var(--ink); }
+  .p1-body { margin-top: 188pt; }   /* zejście poniżej nagłówka */
 
   /* ---------- PAGE 1 — BLOKI TEKSTU ---------- */
   /* górny blok: Arial Narrow 14pt, 3 sekcje (profil ×2 + lecturer) */
@@ -157,7 +163,12 @@
 <!-- ============ PAGE 1 ============ -->
 <div class="page">
   <!-- nagłówek: SVG od użytkownika wstawiony INLINE (tekst zaznaczalny, font Antonio przez @font-face) -->
-  <div class="p1-top">{{ top_svg|safe }}</div>
+  <div class="p1-top">
+    <div class="ah-n1">{{ cv.name.split(' ')[0] }}</div>
+    <div class="ah-n2">{{ cv.name.split(' ')[1:]|join(' ') }}</div>
+    <div class="ah-contact">{{ cv.contact.email }} &nbsp;&nbsp;&nbsp; {{ cv.contact.phone }}</div>
+    {{ top_svg_ats|safe }}
+  </div>
 
   <div class="p1-body">
     <!-- GÓRNY BLOK: Arial Narrow 14pt, 3 sekcje -->

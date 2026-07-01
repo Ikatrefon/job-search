@@ -89,6 +89,13 @@ def _load_svg(name):
     p = config.TEMPLATE_DIR / "assets" / name
     return depattern(p.read_text(encoding="utf-8")) if p.exists() else ""
 
+def _strip_header_text(svg, kws=("MICHAL", "DUCHOWSKI", "michal.duchowski")):
+    """Usuwa z top.svg <text> nazwiska i kontaktu — w wersji ATS dajemy je tekstem HTML
+    (badge/łuk/zdjęcie zostają w SVG). Dzięki temu nazwisko/kontakt = czysty, wczesny tekst."""
+    def repl(m):
+        return "" if any(k in m.group(0) for k in kws) else m.group(0)
+    return re.sub(r'<text\b.*?</text>', repl, svg, flags=re.S)
+
 def _inject_head_svgs(cv_dict):
     for e in cv_dict.get("experience", []):
         fn = HEAD_SVG.get(e.get("company"))
@@ -120,9 +127,10 @@ def render_pdf(cv_dict, out_path, template=None):
     template = template or config.TEMPLATE_HTML
     tpl = Template(template.read_text(encoding="utf-8"))
     top_svg = _load_svg("top.svg")
+    top_svg_ats = _strip_header_text(top_svg)          # bez nazwiska/kontaktu (te dajemy tekstem w ATS)
     edu_svg = _load_svg("edu.svg")
     _inject_head_svgs(cv_dict)
-    base_html = tpl.render(cv=cv_dict, top_svg=top_svg, edu_svg=edu_svg)
+    base_html = tpl.render(cv=cv_dict, top_svg=top_svg, top_svg_ats=top_svg_ats, edu_svg=edu_svg)
     # zapis w katalogu szablonu, żeby względne assets/ się rozwiązały; nazwa unikalna per plik wyjściowy
     tmp = config.TEMPLATE_DIR / f"_render_{Path(out_path).stem}.html"
     with sync_playwright() as p:
