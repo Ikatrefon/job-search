@@ -97,22 +97,45 @@ def _inject_head_svgs(cv_dict):
             if svg:
                 e["head_svg"] = svg
 
+# auto-fit: gdy któraś .page się przelewa (dłuższe treści pod ofertę) — zamiast ciąć,
+# delikatnie zmniejsz font/odstępy sekcji doświadczenia i renderuj ponownie, aż wejdzie.
+_OVERFLOW_JS = "() => [...document.querySelectorAll('.page')].some(p => p.scrollHeight > p.clientHeight + 2)"
+
+def _fit_css(f):
+    return ("<style>"
+            f".blk-top{{font-size:{14*f:.2f}pt!important}}"
+            f".blk-bot,.job2 ul.bul,.ats-job ul.bul{{font-size:{12*f:.2f}pt!important}}"
+            f".job3 ul.bul,.ats-job.job3 ul.bul{{font-size:{11*f:.2f}pt!important}}"
+            f".job2{{margin-bottom:{18*f:.1f}pt!important}}"
+            f".job3{{margin-bottom:{max(7,20*f):.1f}pt!important}}"
+            f".ats-job{{margin-bottom:{max(9,22*f):.1f}pt!important}}"
+            f".ats-job.job3{{margin-bottom:{max(8,20*f):.1f}pt!important}}"
+            f"ul.bul li{{margin-bottom:{1.5*f:.2f}pt!important}}"
+            "</style>")
+
 def render_pdf(cv_dict, out_path, template=None):
     """Render CV → PDF. template=None → wersja graficzna; config.TEMPLATE_ATS → wersja ATS.
-    Oba warianty dostają top_svg/edu_svg/head_svg — szablon używa tego, czego potrzebuje."""
+    Oba warianty dostają top_svg/edu_svg/head_svg — szablon używa tego, czego potrzebuje.
+    Auto-fit: jeśli strony się przelewają, zmniejsza font doświadczenia (aż do ~0.82) zamiast ciąć."""
     template = template or config.TEMPLATE_HTML
     tpl = Template(template.read_text(encoding="utf-8"))
     top_svg = _load_svg("top.svg")
     edu_svg = _load_svg("edu.svg")
     _inject_head_svgs(cv_dict)
-    html = tpl.render(cv=cv_dict, top_svg=top_svg, edu_svg=edu_svg)
+    base_html = tpl.render(cv=cv_dict, top_svg=top_svg, edu_svg=edu_svg)
     # zapis w katalogu szablonu, żeby względne assets/ się rozwiązały; nazwa unikalna per plik wyjściowy
     tmp = config.TEMPLATE_DIR / f"_render_{Path(out_path).stem}.html"
-    tmp.write_text(html, encoding="utf-8")
     with sync_playwright() as p:
         b = p.chromium.launch()
         pg = b.new_page()
-        pg.goto(tmp.as_uri(), wait_until="networkidle")
+        fit = 1.0
+        while True:
+            html = base_html if fit >= 0.999 else base_html.replace("</head>", _fit_css(fit) + "</head>", 1)
+            tmp.write_text(html, encoding="utf-8")
+            pg.goto(tmp.as_uri(), wait_until="networkidle")
+            if fit <= 0.82 or not pg.evaluate(_OVERFLOW_JS):
+                break
+            fit -= 0.05
         pg.pdf(path=str(out_path), format="A4", print_background=True, prefer_css_page_size=True)
         b.close()
     return str(out_path)
